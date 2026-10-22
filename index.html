@@ -336,9 +336,16 @@
   .poll-top{display:flex; align-items:baseline; justify-content:space-between; gap:6px;}
   .poll-name{font-size:11.5px; color:var(--ink-soft);}
   .poll-value{font-family:'Fraunces',serif; font-size:20px; font-weight:500; font-variant-numeric:tabular-nums;}
-  .poll-bar{height:4px; background:var(--paper-dim); margin-top:6px; position:relative;}
+  .poll-bar{display:block; height:4px; background:var(--paper-dim); margin-top:6px; position:relative;}
   .poll-bar i{position:absolute; left:0; top:0; bottom:0; background:var(--accent, var(--sogan)); display:block;}
   .poll-note{font-size:10.5px; color:var(--ink-soft); margin-top:4px; display:block;}
+  .poll summary{list-style:none; cursor:pointer;}
+  .poll summary::-webkit-details-marker{display:none;}
+  .poll summary:focus-visible{outline:2px solid var(--sun); outline-offset:4px;}
+  .poll-more{display:flex; align-items:center; gap:5px; margin-top:6px; font-size:10.5px; font-weight:600; color:var(--sogan);}
+  .poll-more::after{content:''; width:5px; height:5px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:rotate(45deg); transition:transform .18s ease;}
+  .poll[open] .poll-more::after{transform:rotate(-135deg);}
+  .poll-info{margin:8px 0 0; padding:8px 10px; border-left:2px solid var(--sogan); background:var(--paper-dim); font-size:11.5px; line-height:1.5;}
 
   /* ---------- saran ---------- */
   .advice-group{margin-bottom:14px;}
@@ -986,12 +993,12 @@
   // ================= render: polutan =================
   function renderPollutants(pollutants){
     const defs = [
-      { key:'pm2_5', label:'PM2.5' },
-      { key:'pm10', label:'PM10' },
-      { key:'ozone', label:'Ozon' },
-      { key:'nitrogen_dioxide', label:'NO₂' },
-      { key:'sulphur_dioxide', label:'SO₂' },
-      { key:'carbon_monoxide', label:'CO' }
+      { key:'pm2_5', label:'PM2.5', risk:'Partikel sangat halus bisa masuk jauh ke paru-paru dan aliran darah. Memicu batuk, sesak, memperburuk asma, serta meningkatkan risiko penyakit jantung dan stroke.' },
+      { key:'pm10', label:'PM10', risk:'Partikel yang lebih besar mengiritasi hidung, tenggorokan, dan saluran napas. Bisa memicu batuk dan memperburuk asma atau bronkitis.' },
+      { key:'ozone', label:'Ozon', risk:'Mengiritasi paru-paru, menyebabkan nyeri dada, batuk, dan sesak. Paparan berulang dapat menurunkan fungsi paru dan memperburuk asma.' },
+      { key:'nitrogen_dioxide', label:'NO₂', risk:'Mengiritasi saluran napas dan memperburuk asma. Paparan lama dapat menurunkan fungsi paru dan meningkatkan kerentanan terhadap infeksi pernapasan.' },
+      { key:'sulphur_dioxide', label:'SO₂', risk:'Mengiritasi mata, hidung, dan tenggorokan. Pada penderita asma dapat memicu penyempitan saluran napas dan sesak.' },
+      { key:'carbon_monoxide', label:'CO', risk:'Menghambat oksigen dalam darah. Gejalanya sakit kepala, pusing, mual, dan lelah; kadar tinggi bisa menyebabkan pingsan. Paling berisiko bagi penderita gangguan jantung dan ibu hamil.' }
     ];
     $('pollGrid').innerHTML = defs.map(d => {
       const v = pollutants ? pollutants[d.key] : null;
@@ -1008,11 +1015,16 @@
         else if(v <= ref * 2){ level = 'danger'; note = 'di atas ' + span; }
         else { level = 'severe'; note = 'jauh di atas ' + span; }
       }
-      return '<div class="poll ' + level + '">' +
-        '<div class="poll-top"><span class="poll-name">' + d.label + '</span>' +
-        '<span class="poll-value">' + num(v, isNum(v) && v < 100 ? 1 : 0) + '</span></div>' +
-        '<div class="poll-bar"><i style="width:' + (ratio * 100) + '%"></i></div>' +
-        '<span class="poll-note">' + esc(note) + '</span></div>';
+      return '<details class="poll ' + level + '">' +
+        '<summary>' +
+          '<span class="poll-top"><span class="poll-name">' + d.label + '</span>' +
+          '<span class="poll-value">' + num(v, isNum(v) && v < 100 ? 1 : 0) + '</span></span>' +
+          '<span class="poll-bar"><i style="width:' + (ratio * 100) + '%"></i></span>' +
+          '<span class="poll-note">' + esc(note) + '</span>' +
+          '<span class="poll-more">Dampak kesehatan</span>' +
+        '</summary>' +
+        '<p class="poll-info">' + esc(d.risk) + '</p>' +
+      '</details>';
     }).join('');
   }
 

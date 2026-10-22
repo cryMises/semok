@@ -22,6 +22,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
   :root{
+    color-scheme:light;
     --paper:#FBF3E3;
     --paper-dim:#F4E8D0;
     --card:#FFFCF4;
@@ -41,6 +42,10 @@
     --danger-bg:#F6DDD7;
     --severe:#6E1C22;
     --severe-bg:#EAC9C6;
+    --safe-line:#C9D8C0;
+    --caution-line:#E2CF9C;
+    --danger-line:#E8B9B0;
+    --severe-line:#D8A09A;
     --pattern:#8B4A2B;
     --tile-filter:sepia(14%) saturate(80%) brightness(102%);
     --m-kawung:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Cellipse cx='24' cy='12' rx='9' ry='14'/%3E%3Cellipse cx='36' cy='24' rx='14' ry='9'/%3E%3Cellipse cx='24' cy='36' rx='9' ry='14'/%3E%3Cellipse cx='12' cy='24' rx='14' ry='9'/%3E%3Ccircle cx='24' cy='24' r='2'/%3E%3C/g%3E%3C/svg%3E");
@@ -48,6 +53,7 @@
     --m-ceplok:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M9 1 L17 9 L9 17 L1 9 Z' fill='none' stroke='%23000' stroke-width='1.1'/%3E%3Ccircle cx='9' cy='9' r='1.7'/%3E%3C/svg%3E");
   }
   :root[data-theme="dark"]{
+    color-scheme:dark;
     --paper:#131A20;
     --paper-dim:#1A232C;
     --card:#182129;
@@ -67,6 +73,10 @@
     --danger-bg:#2C1D1A;
     --severe:#E3A29B;
     --severe-bg:#2E1A1B;
+    --safe-line:#2E4534;
+    --caution-line:#4A3A1A;
+    --danger-line:#46251F;
+    --severe-line:#4A2224;
     --pattern:#C98A5C;
     --tile-filter:invert(90%) hue-rotate(180deg) saturate(55%) brightness(95%) contrast(92%);
   }
@@ -111,10 +121,11 @@
   .brand-sub{font-size:11.5px; color:var(--ink-soft); margin-top:3px; letter-spacing:.02em;}
   .head-actions{display:flex; gap:8px;}
   .icon-btn{
-    width:38px; height:38px; display:grid; place-items:center;
+    width:42px; height:42px; display:grid; place-items:center;
     background:none; border:1px solid var(--line); color:var(--ink); cursor:pointer;
     transition:background .2s ease, border-color .2s ease;
   }
+  .icon-btn[disabled]{opacity:.55; cursor:progress;}
   .icon-btn:hover{background:var(--paper-dim);}
   .icon-btn:focus-visible{outline:2px solid var(--sun); outline-offset:2px;}
   .icon-btn svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round;}
@@ -141,7 +152,7 @@
     -webkit-mask-size:48px 48px; mask-size:48px 48px;
   }
   .card-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:14px; flex-wrap:wrap;}
-  .card-title{font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft);}
+  .card-title{font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); margin:0;}
 
   /* ---------- state ---------- */
   .state{text-align:center; padding:64px 20px; color:var(--ink-soft);}
@@ -159,10 +170,10 @@
 
   /* ---------- verdict ---------- */
   .verdict{--accent:var(--sogan); border:1px solid var(--line); border-top:3px solid var(--accent); background:var(--card); padding:26px 24px 24px; margin-bottom:18px; position:relative; overflow:hidden;}
-  .verdict.safe{--accent:var(--safe); background:var(--safe-bg); border-color:#c9d8c0;}
-  .verdict.caution{--accent:var(--caution); background:var(--caution-bg); border-color:#e2cf9c;}
-  .verdict.danger{--accent:var(--danger); background:var(--danger-bg); border-color:#e8b9b0;}
-  .verdict.severe{--accent:var(--severe); background:var(--severe-bg); border-color:#d8a09a;}
+  .verdict.safe{--accent:var(--safe); background:var(--safe-bg); border-color:var(--safe-line);}
+  .verdict.caution{--accent:var(--caution); background:var(--caution-bg); border-color:var(--caution-line);}
+  .verdict.danger{--accent:var(--danger); background:var(--danger-bg); border-color:var(--danger-line);}
+  .verdict.severe{--accent:var(--severe); background:var(--severe-bg); border-color:var(--severe-line);}
   .verdict::after{
     content:''; position:absolute; top:-34px; right:-34px; width:190px; height:190px; pointer-events:none;
     background-color:var(--accent); opacity:.12;
@@ -235,7 +246,7 @@
   .popup-reading b{color:var(--ink); font-family:'Fraunces',serif; font-size:14px;}
   .marker-pin{display:flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:2px solid var(--card); box-shadow:0 1px 4px rgba(0,0,0,.35);}
   .marker-pin-dot{width:7px; height:7px; background:var(--card); border-radius:50%; transform:rotate(45deg);}
-  .marker-pin.you{background:var(--sun);}
+  .marker-pin.you{background:var(--sun); box-shadow:0 0 0 2px var(--card), 0 0 0 4px var(--sun), 0 1px 4px rgba(0,0,0,.35);}
   .marker-pin.ref{background:var(--ink-soft);}
   .marker-pin.level-safe{background:var(--safe);} .marker-pin.level-caution{background:var(--caution);}
   .marker-pin.level-danger{background:var(--danger);} .marker-pin.level-severe{background:var(--severe);}
@@ -244,8 +255,10 @@
   .legend{display:flex; flex-wrap:wrap; gap:14px; font-size:11.5px; color:var(--ink-soft);}
   .legend span{display:inline-flex; align-items:center; gap:6px;}
   .legend-dot{width:8px; height:8px; border-radius:50%; display:inline-block; flex:none;}
-  .legend-dot.you{background:var(--sun);} .legend-dot.ref{background:var(--ink-soft);}
+  .legend-dot.you{background:transparent; border:2px solid var(--sun);} .legend-dot.ref{background:var(--ink-soft);}
   .legend-dot.me{background:transparent; border:2px dashed var(--nila);}
+  .legend-dot.level-safe{background:var(--safe);} .legend-dot.level-caution{background:var(--caution);}
+  .legend-dot.level-danger{background:var(--danger);} .legend-dot.level-severe{background:var(--severe);}
   .legend-line{display:inline-block; width:14px; height:0; border-top:2.5px solid;}
   .legend-line.uv{border-color:var(--sun);}
   .legend-line.aqi{border-color:var(--nila);}
@@ -349,8 +362,8 @@
   @media (max-width:520px){ .loc-grid{grid-template-columns:1fr 1fr;} }
   .loc-box{border:1px solid var(--line-soft); background:var(--paper-dim); padding:12px;}
   .loc-k{font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); display:block;}
-  .loc-v{font-family:'Fraunces',serif; font-size:22px; font-weight:500; font-variant-numeric:tabular-nums;}
-  .loc-note{font-size:12.5px; color:var(--ink-soft); margin-top:10px;}
+  .loc-v{display:block; font-family:'Fraunces',serif; font-size:22px; font-weight:500; font-variant-numeric:tabular-nums;}
+  .loc-note{display:block; font-size:12.5px; color:var(--ink-soft); margin-top:10px;}
 
   /* ---------- footer ---------- */
   .foot-band{
@@ -388,10 +401,10 @@
     </div>
     <div class="head-actions">
       <button class="icon-btn" id="locBtn" type="button" title="Cek kondisi di lokasi saya" aria-label="Cek kondisi di lokasi saya">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
       </button>
-      <button class="icon-btn" id="themeBtn" type="button" title="Ganti terang / gelap" aria-label="Ganti terang / gelap">
-        <svg id="themeIcon" viewBox="0 0 24 24"></svg>
+      <button class="icon-btn" id="themeBtn" type="button" title="Aktifkan mode gelap" aria-label="Aktifkan mode gelap">
+        <svg id="themeIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"></svg>
       </button>
     </div>
   </header>
@@ -399,21 +412,27 @@
   <div class="band" aria-hidden="true"></div>
 
   <div id="banner" class="banner hidden" role="status">
-    <svg viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01"/><path d="M10.3 3.9 2.6 17.4A2 2 0 0 0 4.3 20.4h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 8v5M12 17h.01"/><path d="M10.3 3.9 2.6 17.4A2 2 0 0 0 4.3 20.4h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
     <span id="bannerText"></span>
   </div>
 
-  <div id="loadingState" class="state">
+  <div id="loadingState" class="state" role="status">
     <div class="spinner"></div>
     Mengambil data cuaca Semarang Barat...
   </div>
 
-  <div id="errorState" class="state error hidden">
+  <div id="errorState" class="state error hidden" role="alert">
     <p id="errorMessage">Tidak bisa ambil data cuaca.</p>
     <button class="btn" type="button" onclick="loadData()">Coba lagi</button>
   </div>
 
-  <main id="content" class="hidden">
+  <noscript>
+    <div class="state error">
+      <p>Halaman ini membutuhkan JavaScript untuk mengambil data cuaca dan kualitas udara.</p>
+    </div>
+  </noscript>
+
+  <main id="content" class="hidden" aria-busy="true">
 
     <section class="verdict" id="verdictBand">
       <div class="verdict-eyebrow"><span class="dot"></span><span id="verdictEyebrow">-</span></div>
@@ -449,32 +468,35 @@
     <section class="card" style="--accent:var(--nila)">
       <div class="card-head">
         <div>
-          <div class="card-title">Peta kondisi Semarang</div>
+          <h2 class="card-title">Peta kondisi Semarang</h2>
           <div style="font-size:12px;color:var(--ink-soft);margin-top:2px">Data langsung di beberapa titik Semarang</div>
         </div>
         <div class="legend">
-          <span><span class="legend-dot you"></span>BINUS (utama)</span>
-          <span><span class="legend-dot ref"></span>Warna = tingkat bahaya</span>
+          <span><span class="legend-dot you"></span>BINUS</span>
+          <span><span class="legend-dot level-safe"></span>Aman</span>
+          <span><span class="legend-dot level-caution"></span>Waspada</span>
+          <span><span class="legend-dot level-danger"></span>Bahaya</span>
+          <span><span class="legend-dot level-severe"></span>Ekstrem</span>
           <span><span class="legend-dot me"></span>Lokasi saya</span>
         </div>
       </div>
-      <div id="map"></div>
+      <div id="map" aria-label="Peta titik pemantauan Semarang"></div>
       <div class="point-list" id="pointList"></div>
       <p style="font-size:11.5px;color:var(--ink-soft);margin:10px 0 0">Tap titik di peta atau pilih daftar di bawah. Geser untuk pindah; klik peta dulu baru scroll untuk zoom. Angka bisa sama untuk titik berdekatan karena berasal dari grid model, bukan sensor per titik.</p>
     </section>
 
     <section class="card" id="locCard" style="--accent:var(--nila)">
       <div class="card-head">
-        <div class="card-title">Lokasi saya</div>
+        <h2 class="card-title">Lokasi saya</h2>
         <button class="btn" type="button" id="locBtn2" style="padding:6px 12px;font-size:12px">Gunakan GPS saya</button>
       </div>
       <div class="loc-grid" id="locGrid"></div>
-      <p class="loc-note" id="locNote">Belum diaktifkan. Izinkan akses lokasi untuk melihat kondisi di tempat Anda sekarang.</p>
+      <p class="loc-note" id="locNote" role="status">Belum diaktifkan. Izinkan akses lokasi untuk melihat kondisi di tempat Anda sekarang.</p>
     </section>
 
     <section class="card" style="--accent:var(--sun)">
       <div class="card-head">
-        <div class="card-title">Tren 24 jam</div>
+        <h2 class="card-title">Tren 24 jam</h2>
         <div class="legend">
           <span><span class="legend-line uv"></span>UV</span>
           <span><span class="legend-line aqi"></span>AQI</span>
@@ -482,7 +504,7 @@
       </div>
       <div class="chart-holder">
         <div id="chartWrap"></div>
-        <div class="chart-tip hidden" id="chartTip"></div>
+        <div class="chart-tip hidden" id="chartTip" aria-hidden="true"></div>
       </div>
       <div class="chart-footnote">
         <span>Garis penuh = data yang sudah terjadi, putus-putus = perkiraan sisa hari.</span>
@@ -492,7 +514,7 @@
 
     <section class="card" style="--accent:var(--nila)">
       <div class="card-head">
-        <div class="card-title">Jam-jam berikutnya</div>
+        <h2 class="card-title">Jam-jam berikutnya</h2>
         <div style="font-size:12px;color:var(--ink-soft)">12 jam ke depan</div>
       </div>
       <div class="strip" id="hourStrip"></div>
@@ -500,7 +522,7 @@
 
     <section class="card best" id="bestCard" style="--accent:var(--safe)">
       <div style="flex:none">
-        <div class="kicker" style="margin-bottom:6px">Waktu terbaik keluar</div>
+        <h2 class="kicker" style="margin:0 0 6px">Waktu terbaik keluar</h2>
         <div class="best-time" id="bestTime">-</div>
       </div>
       <p class="best-text" id="bestText">-</p>
@@ -508,14 +530,14 @@
 
     <section class="card" style="--accent:var(--sogan)">
       <div class="card-head">
-        <div class="card-title">Rincian polutan</div>
-        <div style="font-size:12px;color:var(--ink-soft)">µg/m³ · pembanding = pedoman WHO 24 jam</div>
+        <h2 class="card-title">Rincian polutan</h2>
+        <div style="font-size:12px;color:var(--ink-soft)">µg/m³ · pembanding pedoman WHO</div>
       </div>
       <div class="poll-grid" id="pollGrid"></div>
     </section>
 
     <section class="card" style="--accent:var(--emas)">
-      <div class="card-head"><div class="card-title">Kalau mau keluar</div></div>
+      <div class="card-head"><h2 class="card-title">Kalau mau keluar</h2></div>
       <div class="advice">
         <div class="advice-group">
           <h3>Soal matahari</h3>
@@ -530,7 +552,7 @@
 
     <div class="actions">
       <button class="btn" type="button" id="refreshBtn" onclick="loadData()">
-        <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-1.9 6.3"/><path d="M20 4v7h-7"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 11a8 8 0 1 0-1.9 6.3"/><path d="M20 4v7h-7"/></svg>
         Perbarui data
       </button>
     </div>
@@ -571,11 +593,19 @@
     { name:'Marina Beach',      desc:'Pantai utara Semarang', lat:-6.9420, lon:110.3980 }
   ];
 
-  // Pedoman WHO 2021 untuk rerata 24 jam (µg/m³). CO tidak punya pedoman 24 jam.
-  const WHO_24H = { pm2_5:15, pm10:45, ozone:100, nitrogen_dioxide:25, sulphur_dioxide:40 };
+  // Pedoman WHO 2021 (µg/m³). Ozon memakai rerata 8 jam, sisanya 24 jam.
+  const WHO_GUIDE = {
+    pm2_5:{ limit:15, span:'24 jam' },
+    pm10:{ limit:45, span:'24 jam' },
+    ozone:{ limit:100, span:'8 jam' },
+    nitrogen_dioxide:{ limit:25, span:'24 jam' },
+    sulphur_dioxide:{ limit:40, span:'24 jam' },
+    carbon_monoxide:{ limit:4000, span:'24 jam' }
+  };
+  const LEVEL_LABEL = { safe:'Aman', caution:'Waspada', danger:'Bahaya', severe:'Ekstrem' };
 
   const WMO = [
-    [0,'Cerah'], [1,'Cerah berawan'], [2,'Berawan Sebagian'], [3,'Berawan'],
+    [0,'Cerah'], [1,'Cerah berawan'], [2,'Berawan'], [3,'Mendung'],
     [45,'Kabut'], [48,'Kabut beku'],
     [51,'Gerimis ringan'], [53,'Gerimis'], [55,'Gerimis lebat'],
     [56,'Gerimis beku'], [57,'Gerimis beku lebat'],
@@ -693,8 +723,11 @@
   async function fetchPoint(lat, lon, full){
     const urls = buildUrls(lat, lon, full);
     const [aq, fc] = await Promise.all([ fetchJson(urls.aq), fetchJson(urls.fc) ]);
-    const uv = isNum(fc.current && fc.current.uv_index) ? fc.current.uv_index : 0;
-    const aqi = isNum(aq.current && aq.current.us_aqi) ? aq.current.us_aqi : 0;
+    if(!isNum(fc.current && fc.current.uv_index) || !isNum(aq.current && aq.current.us_aqi)){
+      throw new Error('Data UV atau AQI tidak tersedia');
+    }
+    const uv = fc.current.uv_index;
+    const aqi = aq.current.us_aqi;
     return { aq, fc, uv, aqi, level: combineLevel(uv, aqi) };
   }
 
@@ -705,7 +738,9 @@
     me: null,               // { lat, lon, uv, aqi, level }
     lastOk: 0,
     nextAt: 0,
-    stale: false
+    stale: false,
+    busy: false,
+    loaded: false
   };
   let map, markers = {}, meMarker = null;
 
@@ -733,10 +768,21 @@
   function meIcon(){
     return L.divIcon({ className:'', html:'<div class="marker-me"></div>', iconSize:[22,22], iconAnchor:[11,11] });
   }
+  function mePopupHtml(me){
+    return '<span class="popup-name">Lokasi saya</span>' +
+      '<span class="popup-desc">GPS perangkat ini</span>' +
+      '<span class="popup-reading">UV <b>' + me.uv.toFixed(1) + '</b> &middot; AQI <b>' + Math.round(me.aqi) + '</b></span>';
+  }
   function ensureMeMarker(){
     if(!state.me || !map) return;
-    if(meMarker) meMarker.setLatLng([state.me.lat, state.me.lon]);
-    else meMarker = L.marker([state.me.lat, state.me.lon], { icon: meIcon() }).addTo(map);
+    if(meMarker){
+      meMarker.setLatLng([state.me.lat, state.me.lon]);
+      meMarker.setPopupContent(mePopupHtml(state.me));
+    }else{
+      meMarker = L.marker([state.me.lat, state.me.lon], { icon:meIcon(), alt:'Lokasi saya', title:'Lokasi saya' })
+        .bindPopup(mePopupHtml(state.me))
+        .addTo(map);
+    }
   }
   function popupHtml(point, reading){
     let body;
@@ -757,7 +803,11 @@
     // scroll zoom hanya aktif setelah pengguna berinteraksi, supaya scroll halaman tidak dibajak
     map.on('click', () => map.scrollWheelZoom.enable());
     POINTS.forEach(point => {
-      const marker = L.marker([point.lat, point.lon], { icon: pinIcon(point.isYou ? 'you' : 'ref') }).addTo(map);
+      const marker = L.marker([point.lat, point.lon], {
+        icon: pinIcon(point.isYou ? 'you' : 'ref'),
+        alt: point.name,
+        title: point.name
+      }).addTo(map);
       marker.bindPopup(popupHtml(point, null));
       markers[point.name] = { marker, point };
     });
@@ -787,9 +837,10 @@
   function renderGauges(p, bands, day){
     const uvPct = pct(p.uv, 12);
     const aqiPct = pct(p.aqi, 300);
+    const night = p.fc.current && p.fc.current.is_day === 0;
     $('uvGauge').className = 'gauge ' + bands.uvB.level;
     $('uvValue').textContent = p.uv.toFixed(1);
-    $('uvBandLabel').textContent = bands.uvB.label;
+    $('uvBandLabel').textContent = night ? 'Malam' : bands.uvB.label;
     $('uvMeter').style.width = uvPct + '%';
     $('aqiGauge').className = 'gauge ' + bands.aqiB.level;
     $('aqiValue').textContent = Math.round(p.aqi);
@@ -812,8 +863,8 @@
     const items = [
       { k:'Suhu', v: isNum(c.temperature_2m) ? Math.round(c.temperature_2m) + '°' : '-', n: isNum(c.apparent_temperature) ? 'terasa ' + Math.round(c.apparent_temperature) + '°' : '' },
       { k:'Kelembapan', v: isNum(c.relative_humidity_2m) ? c.relative_humidity_2m + '%' : '-', n:'' },
-      { k:'Cuaca', v: wmoLabel(c.weather_code), n: isNum(c.precipitation) ? 'hujan ' + c.precipitation + ' mm' : '' },
-      { k:'Matahari terbit', v: p.sunriseLabel, n: 'WIB' },
+      { k:'Cuaca', v: wmoLabel(c.weather_code), n: isNum(c.precipitation) && c.precipitation > 0 ? 'hujan ' + c.precipitation + ' mm' : '' },
+      { k:'Matahari terbit', v: p.sunriseLabel, n:'' },
       { k:'Matahari terbenam', v: p.sunsetLabel, n:'' },
       { k:'UV maks', v: isNum(p.uvMax) ? p.uvMax.toFixed(1) : '-', n:'hari ini' },
       { k:'AQI maks', v: isNum(p.aqiMax) ? String(Math.round(p.aqiMax)) : '-', n:'hari ini' },
@@ -837,19 +888,18 @@
     ];
     $('pollGrid').innerHTML = defs.map(d => {
       const v = pollutants ? pollutants[d.key] : null;
-      const ref = WHO_24H[d.key];
+      const guide = WHO_GUIDE[d.key];
       let note, ratio = 0, level = 'safe';
       if(!isNum(v)){
         note = 'tidak tersedia';
-      } else if(ref){
-        ratio = clamp(v / ref, 0, 1);
-        if(v <= ref / 4){ level = 'safe'; note = 'jauh di bawah pedoman'; }
-        else if(v <= ref){ level = 'caution'; note = 'di bawah pedoman'; }
-        else if(v <= ref * 2){ level = 'danger'; note = 'di atas pedoman'; }
-        else { level = 'severe'; note = 'jauh di atas pedoman'; }
       } else {
-        note = 'tanpa pedoman 24 jam';
-        level = 'caution';
+        const ref = guide.limit;
+        ratio = clamp(v / ref, 0, 1);
+        const span = 'pedoman ' + guide.span;
+        if(v <= ref / 4){ level = 'safe'; note = 'jauh di bawah ' + span; }
+        else if(v <= ref){ level = 'caution'; note = 'di bawah ' + span; }
+        else if(v <= ref * 2){ level = 'danger'; note = 'di atas ' + span; }
+        else { level = 'severe'; note = 'jauh di atas ' + span; }
       }
       return '<div class="poll ' + level + '">' +
         '<div class="poll-top"><span class="poll-name">' + d.label + '</span>' +
@@ -895,7 +945,10 @@
       btn.addEventListener('click', () => {
         const name = btn.dataset.point;
         if(name === '__me'){
-          if(state.me && meMarker) map.flyTo([state.me.lat, state.me.lon], 14, { duration:0.8 });
+          if(state.me && meMarker){
+            map.flyTo([state.me.lat, state.me.lon], 14, { duration:0.8 });
+            meMarker.openPopup();
+          }
         } else {
           focusPoint(name);
         }
@@ -968,8 +1021,13 @@
     const nowLine = '<line x1="' + nowX.toFixed(1) + '" y1="' + padT + '" x2="' + nowX.toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>' +
       '<text x="' + nowX.toFixed(1) + '" y="' + (padT - 7) + '" class="now-label" text-anchor="middle">sekarang</text>';
 
+    const peakUv = day.reduce((best, h) => (h.uv > best.uv ? h : best), day[0]);
+    const peakAqi = day.reduce((worst, h) => (h.aqi > worst.aqi ? h : worst), day[0]);
+    const chartSummary = 'Grafik tren 24 jam. UV tertinggi ' + peakUv.uv.toFixed(1) + ' pukul ' + peakUv.hhmm +
+      '. AQI tertinggi ' + Math.round(peakAqi.aqi) + ' pukul ' + peakAqi.hhmm + '.';
+
     const svg =
-      '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" id="trendSvg">' +
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" id="trendSvg" role="img" aria-label="' + esc(chartSummary) + '">' +
         grid + winRect + sun +
         '<path d="' + path(aqiVals, yAqi, 0, nowIdx) + '" fill="none" stroke="var(--nila)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>' +
         '<path d="' + path(aqiVals, yAqi, nowIdx, n - 1) + '" fill="none" stroke="var(--nila)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5,4" opacity="0.55"/>' +
@@ -1043,7 +1101,7 @@
       score: h.uv + h.aqi / 50,
       level: h.level
     }));
-    const daylight = scored.filter(s => s.h.hour >= sunriseHour && s.h.hour <= sunsetHour);
+    const daylight = scored.filter(s => s.h.hour >= sunriseHour && s.h.hour < sunsetHour);
     const pool = (daylight.length ? daylight : scored).filter(s => RANK[s.level] <= RANK.caution);
     if(!pool.length) return null;
 
@@ -1056,14 +1114,20 @@
     }
     runs.push(cur);
 
+    // pilih rentang terbaik maksimal 2 jam, bukan satu blok panjang yang tidak praktis
     let best = null;
     runs.forEach(run => {
-      const mean = run.reduce((s, r) => s + r.score, 0) / run.length;
-      if(!best || mean < best.mean) best = { run, mean };
+      const len = Math.min(2, run.length);
+      for(let start = 0; start + len <= run.length; start++){
+        const slice = run.slice(start, start + len);
+        const mean = slice.reduce((s, r) => s + r.score, 0) / slice.length;
+        if(!best || mean < best.mean) best = { run:slice, mean };
+      }
     });
     const from = best.run[0], to = best.run[best.run.length - 1];
     const worstLevel = best.run.reduce((w, r) => RANK[r.level] > RANK[w] ? r.level : w, 'safe');
-    return { from: from.i, to: to.i, start: from.h, end: to.h, level: worstLevel, daylight: !!daylight.length };
+    const endLabel = pad2((to.h.hour + 1) % 24) + ':' + to.h.hhmm.slice(3);
+    return { from: from.i, to: to.i, start: from.h, end: to.h, endLabel, level: worstLevel, daylight: !!daylight.length };
   }
   function renderBest(win, today){
     const card = $('bestCard');
@@ -1077,7 +1141,7 @@
     card.classList.remove('is-none');
     card.style.setProperty('--accent', win.level === 'safe' ? 'var(--safe)' : 'var(--caution)');
     const besok = win.start.date !== today;
-    $('bestTime').textContent = (besok ? 'Besok ' : '') + win.start.hhmm + ' – ' + win.end.hhmm;
+    $('bestTime').textContent = (besok ? 'Besok ' : '') + win.start.hhmm + ' – ' + (win.endLabel || win.end.hhmm);
     $('bestText').textContent = win.level === 'safe'
       ? 'UV dan udara sama-sama rendah di rentang ini. Waktu paling nyaman buat keluar, jalan, atau olahraga ringan.'
       : 'Masih bisa keluar, tapi UV atau udara belum ideal. Pakai sunscreen dan jangan kelamaan di luar.';
@@ -1092,11 +1156,10 @@
       return;
     }
     const level = state.me.level;
-    const band = uvBand(state.me.uv).level;
     grid.innerHTML =
       '<div class="loc-box"><span class="loc-k">Indeks UV</span><span class="loc-v">' + state.me.uv.toFixed(1) + '</span><span class="loc-note" style="margin:2px 0 0">' + uvBand(state.me.uv).label + '</span></div>' +
       '<div class="loc-box"><span class="loc-k">US AQI</span><span class="loc-v">' + Math.round(state.me.aqi) + '</span><span class="loc-note" style="margin:2px 0 0">' + aqiBand(state.me.aqi).label + '</span></div>' +
-      '<div class="loc-box"><span class="loc-k">Tingkat</span><span class="loc-v" style="color:var(--' + level + ')">' + level + '</span><span class="loc-note" style="margin:2px 0 0">' + state.me.lat.toFixed(3) + ', ' + state.me.lon.toFixed(3) + '</span></div>';
+      '<div class="loc-box"><span class="loc-k">Tingkat bahaya</span><span class="loc-v" style="color:var(--' + level + ')">' + LEVEL_LABEL[level] + '</span><span class="loc-note" style="margin:2px 0 0">' + state.me.lat.toFixed(3) + ', ' + state.me.lon.toFixed(3) + '</span></div>';
     $('locNote').textContent = 'Perkiraan untuk koordinat GPS perangkat ini. Data tetap berbasis model, bukan sensor personal.';
   }
 
@@ -1112,16 +1175,20 @@
     const times = (fc.hourly && fc.hourly.time) || [];
     const uvVals = (fc.hourly && fc.hourly.uv_index) || [];
     const popVals = (fc.hourly && fc.hourly.precipitation_probability) || [];
+    const aqiTimes = (aq.hourly && aq.hourly.time) || [];
     const aqiVals = (aq.hourly && aq.hourly.us_aqi) || [];
+    const aqiByTime = new Map();
+    aqiTimes.forEach((t, i) => { if(isNum(aqiVals[i])) aqiByTime.set(t, aqiVals[i]); });
     const dayStart = times.findIndex(t => { const a = apiTime(t); return a && a.date === cur.date; });
 
     const all = [];
     for(let i = 0; i < times.length; i++){
       const t = apiTime(times[i]);
+      const hourAqi = aqiByTime.get(times[i]);
       all.push({
         time: times[i], date: t.date, hour: t.hour, hhmm: t.hhmm,
         uv: isNum(uvVals[i]) ? uvVals[i] : 0,
-        aqi: isNum(aqiVals[i]) ? aqiVals[i] : 0,
+        aqi: isNum(hourAqi) ? hourAqi : 0,
         pop: isNum(popVals[i]) ? popVals[i] : 0
       });
     }
@@ -1137,8 +1204,8 @@
     // matahari terbit / terbenam hari ini
     const daily = fc.daily || {};
     const dayIdx = (daily.time || []).indexOf(cur.date);
-    const sunrise = dayIdx >= 0 ? apiTime(daily.sunrise[dayIdx]) : null;
-    const sunset = dayIdx >= 0 ? apiTime(daily.sunset[dayIdx]) : null;
+    const sunrise = dayIdx >= 0 && daily.sunrise ? apiTime(daily.sunrise[dayIdx]) : null;
+    const sunset = dayIdx >= 0 && daily.sunset ? apiTime(daily.sunset[dayIdx]) : null;
     const srHour = sunrise ? sunrise.hour : 0;
     const ssHour = sunset ? sunset.hour : 23;
 
@@ -1161,7 +1228,7 @@
     p.sunriseLabel = sunrise ? sunrise.hhmm : '-';
     p.sunsetLabel = sunset ? sunset.hhmm : '-';
     p.todayLabel = cur.date;
-    p.uvMax = dayIdx >= 0 ? daily.uv_index_max[dayIdx] : null;
+    p.uvMax = dayIdx >= 0 && daily.uv_index_max ? daily.uv_index_max[dayIdx] : null;
     p.aqiMax = day.length ? Math.max.apply(null, day.map(d => d.aqi)) : null;
     p.rainNow = isNum(popVals[nowHourAbs]) ? popVals[nowHourAbs] + '%' : '-';
     renderStats(p);
@@ -1192,10 +1259,12 @@
 
   // ================= pemuatan data =================
   function setLoading(on){
-    $('loadingState').classList.toggle('hidden', !on);
-    if(on){ $('errorState').classList.add('hidden'); $('content').classList.add('hidden'); }
+    const initial = !state.loaded;
+    $('loadingState').classList.toggle('hidden', !(on && initial));
+    if(on && initial){ $('errorState').classList.add('hidden'); $('content').classList.add('hidden'); }
     const btn = $('refreshBtn');
     if(btn){ btn.disabled = on; btn.classList.toggle('is-loading', on); }
+    $('content').setAttribute('aria-busy', on ? 'true' : 'false');
   }
   function showBanner(text){
     $('bannerText').textContent = text;
@@ -1204,6 +1273,8 @@
   function hideBanner(){ $('banner').classList.add('hidden'); }
 
   async function loadData(){
+    if(state.busy) return;
+    state.busy = true;
     setLoading(true);
     try{
       const primaryPoint = POINTS.find(p => p.isYou);
@@ -1215,6 +1286,7 @@
       $('content').classList.remove('hidden');
       $('errorState').classList.add('hidden');
       renderPrimary();
+      state.loaded = true;
       loadReferencePoints();
       saveCache();
       if(map) setTimeout(() => map.invalidateSize(), 60);
@@ -1225,6 +1297,7 @@
         state.refs = cache.refs || {};
         state.me = cache.me || null;
         state.stale = true;
+        state.loaded = true;
         showBanner('Gagal mengambil data baru. Menampilkan data terakhir yang tersimpan (' + clockJakarta(new Date(cache.savedAt)) + ' WIB).');
         $('content').classList.remove('hidden');
         $('errorState').classList.add('hidden');
@@ -1238,6 +1311,7 @@
       }
       console.error(err);
     }finally{
+      state.busy = false;
       state.nextAt = Date.now() + REFRESH_MS;
       setLoading(false);
     }
@@ -1253,13 +1327,15 @@
         state.refs[point.name] = { uv: result.uv, aqi: result.aqi, level: result.level };
         entry.marker.setIcon(pinIcon('ref', result.level));
         entry.marker.setPopupContent(popupHtml(point, result));
-        renderPointList();
-        saveCache();
       }catch(err){
         console.error('Gagal memuat', point.name, err);
-        entry.marker.setPopupContent('<span class="popup-name">' + esc(point.name) + '</span><span class="popup-desc">' + esc(point.desc) + '</span><span class="popup-reading">Data tidak tersedia</span>');
+        if(!state.refs[point.name]){
+          entry.marker.setPopupContent('<span class="popup-name">' + esc(point.name) + '</span><span class="popup-desc">' + esc(point.desc) + '</span><span class="popup-reading">Data tidak tersedia</span>');
+        }
       }
     }));
+    renderPointList();
+    saveCache();
   }
 
   function useMyLocation(){
@@ -1292,9 +1368,11 @@
   }
 
   // ================= tema =================
-  function applyTheme(theme){
+  function applyTheme(theme, persist){
     document.documentElement.dataset.theme = theme;
-    try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
+    if(persist !== false){
+      try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
+    }
     const meta = document.querySelector('meta[name="theme-color"]');
     if(meta) meta.setAttribute('content', theme === 'dark' ? '#131A20' : '#FBF3E3');
     const icon = $('themeIcon');
@@ -1302,6 +1380,12 @@
       icon.innerHTML = theme === 'dark'
         ? '<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/>'
         : '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>';
+    }
+    const btn = $('themeBtn');
+    if(btn){
+      const label = theme === 'dark' ? 'Aktifkan mode terang' : 'Aktifkan mode gelap';
+      btn.title = label;
+      btn.setAttribute('aria-label', label);
     }
   }
 
@@ -1316,7 +1400,7 @@
 
   // ================= init =================
   function init(){
-    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
+    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light', false);
     $('themeBtn').addEventListener('click', () => {
       applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
     });
@@ -1327,6 +1411,9 @@
     loadData();
     setInterval(loadData, REFRESH_MS);
     setInterval(tickCountdown, 1000);
+    document.addEventListener('visibilitychange', () => {
+      if(!document.hidden && state.nextAt && Date.now() >= state.nextAt) loadData();
+    });
   }
 
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

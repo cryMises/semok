@@ -11,8 +11,8 @@ Info kondisi UV dan kualitas udara di Semarang, fokus utama area BINUS @Semarang
 - **Cek lokasi saya** — pakai GPS perangkat untuk melihat perkiraan UV dan AQI di tempat Anda sekarang, plus penanda khusus di peta.
 - **Grafik 24 jam** — tren UV dan AQI hari ini dengan dua sumbu. Garis penuh untuk data yang sudah terjadi, garis putus-putus untuk perkiraan sisa hari. Tanda matahari terbit/terbenam, penanda "sekarang", dan tooltip kalau ditunjuk.
 - **Jam-jam berikutnya** — 12 jam ke depan lengkap dengan UV, AQI, dan peluang hujan.
-- **Waktu terbaik keluar** — jendela 24 jam ke depan yang paling aman, dipilih otomatis dari data per jam.
-- **Rincian polutan** — PM2.5, PM10, ozon, NO₂, SO₂, CO dalam µg/m³, dibandingkan dengan pedoman WHO 24 jam.
+- **Waktu terbaik keluar** — jendela hingga 2 jam paling nyaman dalam 24 jam ke depan, dipilih otomatis dari data per jam.
+- **Rincian polutan** — PM2.5, PM10, ozon, NO₂, SO₂, CO dalam µg/m³, dibandingkan dengan pedoman WHO: ozon rerata 8 jam, polutan lain rerata 24 jam.
 - **Saran praktis** — berbeda-beda tergantung apakah UV atau kualitas udara yang jadi masalah.
 - **Mode gelap** — mengikuti sistem, bisa diganti manual dan diingat.
 - **Update otomatis** tiap 10 menit, lengkap dengan hitung mundur ke update berikutnya.

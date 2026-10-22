@@ -7,7 +7,7 @@ Info kondisi UV dan kualitas udara di Semarang, fokus utama area BINUS @Semarang
 - **Kesimpulan bahaya** — satu kalimat jelas: aman, santai saja, batasi waktu, atau hindari keluar. Diambil dari kombinasi UV dan AQI, mana yang lebih parah yang menentukan. Ada chip yang menyebut mana yang jadi pemicu.
 - **Dua gauge** — Indeks UV dan US AQI lengkap dengan levelnya, plus catatan jam paling ekstrem hari itu.
 - **Ringkasan kondisi** — suhu, suhu terasa, kelembapan, cuaca, matahari terbit/terbenam, UV maksimum, AQI maksimum, dan peluang hujan.
-- **Peta interaktif** — 6 titik di Semarang (BINUS jadi titik utama, plus Sam Poo Kong, Lawang Sewu, Simpang Lima, Kota Lama, Marina Beach). Tiap titik berwarna sesuai tingkat bahaya, tap untuk lihat angka UV dan AQI di sana. Ada juga daftar titik yang bisa diklik.
+- **Peta interaktif** — 38 penanda provinsi (warna sesuai tingkat bahaya, bintang untuk kondisi terburuk nasional) plus 6 titik Semarang. BINUS jadi titik utama. Tap penanda untuk lihat UV dan AQI; daftar di bawah peta tetap hanya berisi titik Semarang.
 - **Cek lokasi saya** — pakai GPS perangkat untuk melihat perkiraan UV dan AQI di tempat Anda sekarang, plus penanda khusus di peta.
 - **Grafik 24 jam** — tren UV dan AQI hari ini dengan dua sumbu. Garis penuh untuk data yang sudah terjadi, garis putus-putus untuk perkiraan sisa hari. Tanda matahari terbit/terbenam, penanda "sekarang", dan tooltip kalau ditunjuk.
 - **Jam-jam berikutnya** — 12 jam ke depan lengkap dengan UV, AQI, dan peluang hujan.
@@ -25,7 +25,7 @@ Info kondisi UV dan kualitas udara di Semarang, fokus utama area BINUS @Semarang
 - `air-quality-api.open-meteo.com` untuk AQI dan polutan
 - `api.open-meteo.com/v1/forecast` untuk indeks UV, cuaca, dan matahari terbit/terbenam
 
-Titik utama (BINUS) juga ambil data per jam (`hourly=uv_index`, `hourly=us_aqi`, `hourly=precipitation_probability`) untuk grafik, strip jam-jam berikutnya, dan pencarian waktu terbaik. Lima titik lainnya cuma ambil data saat ini, supaya jumlah request tetap ringan.
+Titik utama (BINUS) juga ambil data per jam (`hourly=uv_index`, `hourly=us_aqi`, `hourly=precipitation_probability`) untuk grafik, strip jam-jam berikutnya, dan pencarian waktu terbaik. Lima titik Semarang lainnya cuma ambil data saat ini. Data 38 provinsi diambil lewat dua request batch (satu untuk AQI, satu untuk UV), memakai koordinat ibu kota provinsi.
 
 ## Cara pakai
 
@@ -54,7 +54,7 @@ Motif batik (kawung, zigzag, ceplok) digambar sebagai SVG di dalam `data:` URI d
 | Lawang Sewu | -6.9839 | 110.4106 | Bangunan bersejarah, pusat kota |
 | Simpang Lima | -6.9898 | 110.4229 | Alun-alun pusat kota |
 | Kota Lama (Blenduk) | -6.9681 | 110.4275 | Kawasan Kota Lama |
-| Marina Beach | -6.9420 | 110.3980 | Pantai utara Semarang |
+| Marina Beach | -6.9477 | 110.3901 | Pantai utara Semarang |
 
 Koordinat BINUS diambil dari alamat POJ Avenue Kav. 3, Kel. Tawangsari, Kec. Semarang Barat karena tidak ada titik resmi untuk gedungnya.
 

@@ -103,9 +103,9 @@
   .bg-kawung{
     position:fixed; inset:0; z-index:0; pointer-events:none;
     background-color:var(--pattern);
-    opacity:.07;
+    opacity:.16;
     -webkit-mask-image:var(--m-kawung); mask-image:var(--m-kawung);
-    -webkit-mask-size:48px 48px; mask-size:48px 48px;
+    -webkit-mask-size:64px 64px; mask-size:64px 64px;
   }
   .page{position:relative; z-index:1; max-width:720px; margin:0 auto; padding:20px 18px 64px;}
 
@@ -137,7 +137,7 @@
 
   .band{
     height:11px; margin:0 0 22px;
-    background-color:var(--sogan); opacity:.55;
+    background-color:var(--sogan); opacity:.7;
     -webkit-mask-image:var(--m-zigzag); mask-image:var(--m-zigzag);
     -webkit-mask-size:24px 10px; mask-size:24px 10px;
     -webkit-mask-repeat:repeat-x; mask-repeat:repeat-x;
@@ -238,18 +238,38 @@
   .marker-pin.level-safe{background:var(--safe);} .marker-pin.level-caution{background:var(--caution);}
   .marker-pin.level-danger{background:var(--danger);} .marker-pin.level-severe{background:var(--severe);}
   .marker-me{width:22px; height:22px; border-radius:50%; border:2px dashed var(--nila); background:rgba(46,63,92,.25); box-shadow:0 0 0 3px rgba(46,63,92,.15);}
+  .province-marker{
+    width:12px; height:12px; border-radius:50%; background:var(--ink-soft);
+    border:2px solid var(--card); box-shadow:0 1px 4px rgba(0,0,0,.35);
+  }
+  .province-marker.level-safe{background:var(--safe);} .province-marker.level-caution{background:var(--caution);}
+  .province-marker.level-danger{background:var(--danger);} .province-marker.level-severe{background:var(--severe);}
+  .province-marker.is-worst{
+    width:24px; height:24px; display:grid; place-items:center;
+    background:var(--severe); color:var(--paper); font-size:13px; line-height:1;
+    box-shadow:0 0 0 3px var(--severe), 0 0 0 6px color-mix(in srgb, var(--severe) 24%, transparent), 0 1px 5px rgba(0,0,0,.4);
+  }
+  .popup-flag{
+    display:inline-block; margin-top:6px; padding:2px 7px;
+    background:var(--severe); color:var(--paper); font-size:10px; font-weight:600;
+    letter-spacing:.06em; text-transform:uppercase;
+  }
 
   .legend{display:flex; flex-wrap:wrap; gap:14px; font-size:11.5px; color:var(--ink-soft);}
   .legend span{display:inline-flex; align-items:center; gap:6px;}
   .legend-dot{width:8px; height:8px; border-radius:50%; display:inline-block; flex:none;}
   .legend-dot.you{background:transparent; border:2px solid var(--sun);} .legend-dot.ref{background:var(--ink-soft);}
   .legend-dot.me{background:transparent; border:2px dashed var(--nila);}
+  .legend-dot.province{width:7px; height:7px; background:var(--ink-soft);}
+  .legend-star{color:var(--severe); font-size:13px; line-height:1;}
   .legend-dot.level-safe{background:var(--safe);} .legend-dot.level-caution{background:var(--caution);}
   .legend-dot.level-danger{background:var(--danger);} .legend-dot.level-severe{background:var(--severe);}
   .legend-line{display:inline-block; width:14px; height:0; border-top:2.5px solid;}
   .legend-line.uv{border-color:var(--sun);}
   .legend-line.aqi{border-color:var(--nila);}
 
+  .province-summary{font-size:11.5px; color:var(--ink-soft); margin:10px 0 0;}
+  .province-summary b{color:var(--ink);}
   .point-list{margin-top:14px; border-top:1px solid var(--line-soft);}
   .point{
     width:100%; display:flex; align-items:center; gap:12px; text-align:left;
@@ -355,7 +375,7 @@
   /* ---------- footer ---------- */
   .foot-band{
     height:11px; margin:0 0 14px;
-    background-color:var(--sogan); opacity:.55;
+    background-color:var(--sogan); opacity:.7;
     -webkit-mask-image:var(--m-zigzag); mask-image:var(--m-zigzag);
     -webkit-mask-size:24px 10px; mask-size:24px 10px;
     -webkit-mask-repeat:repeat-x; mask-repeat:repeat-x;
@@ -455,21 +475,24 @@
     <section class="card" style="--accent:var(--nila)">
       <div class="card-head">
         <div>
-          <h2 class="card-title">Peta kondisi Semarang</h2>
-          <div style="font-size:12px;color:var(--ink-soft);margin-top:2px">Data langsung di beberapa titik Semarang</div>
+          <h2 class="card-title">Peta kondisi Indonesia</h2>
+          <div style="font-size:12px;color:var(--ink-soft);margin-top:2px">38 provinsi · detail Semarang di bawah</div>
         </div>
         <div class="legend">
           <span><span class="legend-dot you"></span>BINUS</span>
+          <span><span class="legend-dot province"></span>Provinsi</span>
           <span><span class="legend-dot level-safe"></span>Aman</span>
           <span><span class="legend-dot level-caution"></span>Waspada</span>
           <span><span class="legend-dot level-danger"></span>Bahaya</span>
           <span><span class="legend-dot level-severe"></span>Ekstrem</span>
+          <span><span class="legend-star" aria-hidden="true">★</span>Terburuk nasional</span>
           <span><span class="legend-dot me"></span>Lokasi saya</span>
         </div>
       </div>
-      <div id="map" aria-label="Peta titik pemantauan Semarang"></div>
+      <div id="map" aria-label="Peta kondisi provinsi Indonesia dan titik pemantauan Semarang"></div>
+      <p class="province-summary" id="provinceSummary" role="status">Memuat kondisi 38 provinsi...</p>
       <div class="point-list" id="pointList"></div>
-      <p style="font-size:11.5px;color:var(--ink-soft);margin:10px 0 0">Tap titik di peta atau pilih daftar di bawah. Geser untuk pindah; klik peta dulu baru scroll untuk zoom. Angka bisa sama untuk titik berdekatan karena berasal dari grid model, bukan sensor per titik.</p>
+      <p style="font-size:11.5px;color:var(--ink-soft);margin:10px 0 0">Tap titik provinsi atau bintang untuk detail. Pilih daftar Semarang di bawah untuk zoom ke kota. Angka provinsi memakai grid model di sekitar ibu kota, bukan sensor per titik.</p>
     </section>
 
     <section class="card" id="locCard" style="--accent:var(--nila)">
@@ -577,7 +600,49 @@
     { name:'Lawang Sewu',       desc:'Bangunan bersejarah, pusat kota', lat:-6.9839, lon:110.4106 },
     { name:'Simpang Lima',      desc:'Alun-alun pusat kota', lat:-6.9898, lon:110.4229 },
     { name:'Kota Lama (Blenduk)', desc:'Kawasan Kota Lama', lat:-6.9681, lon:110.4275 },
-    { name:'Marina Beach',      desc:'Pantai utara Semarang', lat:-6.9420, lon:110.3980 }
+    { name:'Marina Beach',      desc:'Pantai utara Semarang', lat:-6.9477, lon:110.3901 }
+  ];
+
+  // Satu titik representatif per provinsi, memakai koordinat ibu kota.
+  const PROVINCES = [
+    { name:'Aceh', lat:5.5483, lon:95.3238 },
+    { name:'Sumatera Utara', lat:3.5952, lon:98.6722 },
+    { name:'Sumatera Barat', lat:-0.9471, lon:100.4172 },
+    { name:'Riau', lat:0.5071, lon:101.4478 },
+    { name:'Kepulauan Riau', lat:0.9186, lon:104.4665 },
+    { name:'Jambi', lat:-1.6101, lon:103.6131 },
+    { name:'Bengkulu', lat:-3.7928, lon:102.2608 },
+    { name:'Sumatera Selatan', lat:-2.9761, lon:104.7754 },
+    { name:'Kepulauan Bangka Belitung', lat:-2.1316, lon:106.1169 },
+    { name:'Lampung', lat:-5.3971, lon:105.2668 },
+    { name:'Banten', lat:-6.1104, lon:106.1503 },
+    { name:'DKI Jakarta', lat:-6.2088, lon:106.8456 },
+    { name:'Jawa Barat', lat:-6.9175, lon:107.6191 },
+    { name:'Jawa Tengah', lat:-6.9667, lon:110.4167 },
+    { name:'DI Yogyakarta', lat:-7.7956, lon:110.3695 },
+    { name:'Jawa Timur', lat:-7.2575, lon:112.7521 },
+    { name:'Bali', lat:-8.6705, lon:115.2126 },
+    { name:'Nusa Tenggara Barat', lat:-8.5833, lon:116.1167 },
+    { name:'Nusa Tenggara Timur', lat:-10.1772, lon:123.6070 },
+    { name:'Kalimantan Barat', lat:-0.0263, lon:109.3425 },
+    { name:'Kalimantan Tengah', lat:-2.2080, lon:113.9165 },
+    { name:'Kalimantan Selatan', lat:-3.3186, lon:114.5944 },
+    { name:'Kalimantan Timur', lat:-0.5022, lon:117.1536 },
+    { name:'Kalimantan Utara', lat:2.8375, lon:117.3667 },
+    { name:'Sulawesi Utara', lat:1.4748, lon:124.8421 },
+    { name:'Sulawesi Tengah', lat:-0.9003, lon:119.8779 },
+    { name:'Sulawesi Selatan', lat:-5.1477, lon:119.4327 },
+    { name:'Sulawesi Tenggara', lat:-3.9985, lon:122.5120 },
+    { name:'Gorontalo', lat:0.5435, lon:123.0568 },
+    { name:'Sulawesi Barat', lat:-2.6748, lon:118.8885 },
+    { name:'Maluku', lat:-3.6954, lon:128.1814 },
+    { name:'Maluku Utara', lat:0.7370, lon:127.5588 },
+    { name:'Papua Barat', lat:-0.8615, lon:134.0620 },
+    { name:'Papua Barat Daya', lat:-0.8762, lon:131.2558 },
+    { name:'Papua', lat:-2.5337, lon:140.7181 },
+    { name:'Papua Tengah', lat:-3.3599, lon:135.4989 },
+    { name:'Papua Pegunungan', lat:-4.0996, lon:138.9475 },
+    { name:'Papua Selatan', lat:-8.4932, lon:140.4018 }
   ];
 
   // Pedoman WHO 2021 (µg/m³). Ozon memakai rerata 8 jam, sisanya 24 jam.
@@ -717,19 +782,43 @@
     const aqi = aq.current.us_aqi;
     return { aq, fc, uv, aqi, level: combineLevel(uv, aqi) };
   }
+  async function fetchProvinces(){
+    const q = 'latitude=' + PROVINCES.map(p => p.lat).join(',') +
+      '&longitude=' + PROVINCES.map(p => p.lon).join(',') +
+      '&timezone=' + encodeURIComponent(TZ);
+    const [aq, fc] = await Promise.all([
+      fetchJson(API_AQ + '?' + q + '&current=us_aqi'),
+      fetchJson(API_FC + '?' + q + '&current=uv_index,is_day')
+    ]);
+    const aqRows = Array.isArray(aq) ? aq : [aq];
+    const fcRows = Array.isArray(fc) ? fc : [fc];
+    if(aqRows.length !== PROVINCES.length || fcRows.length !== PROVINCES.length){
+      throw new Error('Respons provinsi tidak lengkap');
+    }
+    return PROVINCES.map((province, i) => {
+      const aqi = aqRows[i] && aqRows[i].current ? aqRows[i].current.us_aqi : null;
+      const uv = fcRows[i] && fcRows[i].current ? fcRows[i].current.uv_index : null;
+      if(!isNum(aqi) || !isNum(uv)) return { ...province, uv:null, aqi:null, level:null };
+      return { ...province, uv, aqi, level:combineLevel(uv, aqi) };
+    });
+  }
 
   // ================= state =================
   const state = {
     primary: null,          // { aq, fc, uv, aqi, level }
     refs: {},               // nama -> { uv, aqi, level }
     me: null,               // { lat, lon, uv, aqi, level }
+    provinces: [],          // [{ name, uv, aqi, level }]
+    provincesBusy: false,
     lastOk: 0,
     nextAt: 0,
     stale: false,
     busy: false,
-    loaded: false
+    loaded: false,
+    mapReady: false
   };
   let map, markers = {}, meMarker = null;
+  const provinceMarkers = {};
 
   // ================= cache =================
   function saveCache(){
@@ -780,9 +869,31 @@
     }
     return '<span class="popup-name">' + esc(point.name) + '</span><span class="popup-desc">' + esc(point.desc) + '</span>' + body;
   }
+  function provinceIcon(level, isWorst){
+    const cls = 'province-marker' + (level ? ' level-' + level : '') + (isWorst ? ' is-worst' : '');
+    const size = isWorst ? 24 : 12;
+    return L.divIcon({
+      className:'',
+      html:'<div class="' + cls + '">' + (isWorst ? '<span aria-hidden="true">★</span>' : '') + '</div>',
+      iconSize:[size, size], iconAnchor:[size / 2, size / 2], popupAnchor:[0, -size / 2]
+    });
+  }
+  function provincePopupHtml(province, reading, isWorst){
+    const body = reading
+      ? '<span class="popup-desc">Provinsi · ' + esc(LEVEL_LABEL[reading.level]) + '</span>' +
+        '<span class="popup-reading">UV <b>' + reading.uv.toFixed(1) + '</b> &middot; AQI <b>' + Math.round(reading.aqi) + '</b></span>'
+      : '<span class="popup-desc">Provinsi · data belum tersedia</span>';
+    return '<span class="popup-name">' + esc(province.name) + '</span>' + body +
+      (isWorst ? '<span class="popup-flag">Terburuk nasional</span>' : '');
+  }
+  function fitIndonesia(){
+    if(!map) return;
+    map.invalidateSize();
+    map.fitBounds(L.latLngBounds(PROVINCES.map(p => [p.lat, p.lon])), { padding:[18, 18] });
+  }
   function initMap(){
     map = L.map('map', { scrollWheelZoom:false, zoomControl:true })
-      .setView([-6.9830, 110.4020], 12);
+      .setView([-2.5, 118], 5);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom:18,
       attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
@@ -797,6 +908,15 @@
       }).addTo(map);
       marker.bindPopup(popupHtml(point, null));
       markers[point.name] = { marker, point };
+    });
+    PROVINCES.forEach(province => {
+      const marker = L.marker([province.lat, province.lon], {
+        icon: provinceIcon(null, false),
+        alt: province.name + ', provinsi',
+        title: province.name + ' · provinsi'
+      }).addTo(map);
+      marker.bindPopup(provincePopupHtml(province, null, false));
+      provinceMarkers[province.name] = marker;
     });
   }
   function focusPoint(name){
@@ -1243,6 +1363,55 @@
     });
     ensureMeMarker();
     renderPointList();
+    if(map && !state.mapReady){
+      state.mapReady = true;
+      setTimeout(fitIndonesia, 80);
+    }
+  }
+
+  function renderProvinces(){
+    const valid = state.provinces.filter(p => p.level && isNum(p.uv) && isNum(p.aqi));
+    const worst = valid.reduce((w, p) => {
+      if(!w) return p;
+      const diff = RANK[p.level] - RANK[w.level];
+      if(diff !== 0) return diff > 0 ? p : w;
+      if(p.aqi !== w.aqi) return p.aqi > w.aqi ? p : w;
+      return p.uv > w.uv ? p : w;
+    }, null);
+    state.provinces.forEach(p => {
+      const marker = provinceMarkers[p.name];
+      if(!marker) return;
+      const hasReading = p.level && isNum(p.uv) && isNum(p.aqi);
+      const isWorst = !!worst && p.name === worst.name;
+      marker.setIcon(provinceIcon(hasReading ? p.level : null, isWorst));
+      marker.setPopupContent(provincePopupHtml(p, hasReading ? p : null, isWorst));
+      const label = p.name + (isWorst ? ' · terburuk nasional' : ' · provinsi');
+      const el = marker.getElement();
+      if(el){ el.title = label; el.setAttribute('aria-label', label); }
+    });
+    const summary = $('provinceSummary');
+    if(!summary) return;
+    if(worst){
+      summary.innerHTML = valid.length + ' provinsi dipantau · Terburuk: <b>' + esc(worst.name) + '</b>' +
+        ' · UV ' + worst.uv.toFixed(1) + ' · AQI ' + Math.round(worst.aqi);
+    } else {
+      summary.textContent = 'Data provinsi belum tersedia.';
+    }
+  }
+
+  async function loadProvinces(){
+    if(state.provincesBusy) return;
+    state.provincesBusy = true;
+    try{
+      state.provinces = await fetchProvinces();
+      renderProvinces();
+    }catch(err){
+      console.error('Gagal memuat data provinsi', err);
+      const summary = $('provinceSummary');
+      if(summary && !state.provinces.some(p => p.level)) summary.textContent = 'Data provinsi belum tersedia.';
+    }finally{
+      state.provincesBusy = false;
+    }
   }
 
   // ================= pemuatan data =================
@@ -1277,6 +1446,7 @@
       state.loaded = true;
       renderRefs();
       loadReferencePoints();
+      loadProvinces();
       saveCache();
       if(map) setTimeout(() => map.invalidateSize(), 60);
     }catch(err){
@@ -1293,6 +1463,7 @@
         renderPrimary();
         renderRefs();
         renderMe();
+        loadProvinces();
       }else{
         $('loadingState').classList.add('hidden');
         $('errorState').classList.remove('hidden');

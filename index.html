@@ -1,571 +1,436 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>sêmok - BINUS Semarang</title>
+<title>sêmok — Info UV &amp; kualitas udara Semarang</title>
+<meta name="description" content="Kondisi UV dan kualitas udara di Semarang, fokus BINUS @Semarang. Satu file HTML, tanpa server, tanpa API key.">
+<meta name="theme-color" content="#FBF3E3">
+<script>
+  // set tema sebelum halaman digambar supaya tidak ada kedipan
+  (function(){
+    var saved = null;
+    try { saved = localStorage.getItem('semok.theme'); } catch(e){}
+    var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  })();
+</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23FBF3E3'/%3E%3Cg fill='none' stroke='%238B4A2B' stroke-width='1.4'%3E%3Cellipse cx='16' cy='9' rx='4.5' ry='7'/%3E%3Cellipse cx='23' cy='16' rx='7' ry='4.5'/%3E%3Cellipse cx='16' cy='23' rx='4.5' ry='7'/%3E%3Cellipse cx='9' cy='16' rx='7' ry='4.5'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%238B4A2B'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
   :root{
-    --paper:#FFF8EC;
-    --paper-dim:#F5EEDD;
-    --ink:#1A1A16;
-    --ink-soft:#5C574C;
-    --line:#DED2B4;
+    --paper:#FBF3E3;
+    --paper-dim:#F4E8D0;
+    --card:#FFFCF4;
+    --ink:#1C1A16;
+    --ink-soft:#6B6355;
+    --line:#DCCBAA;
+    --line-soft:#EADFC6;
+    --sogan:#8B4A2B;
+    --nila:#2E3F5C;
+    --emas:#9A7520;
     --sun:#E8622C;
     --safe:#2F5233;
-    --safe-bg:#E3EBDD;
+    --safe-bg:#E4ECDE;
     --caution:#8A5A00;
-    --caution-bg:#F2E4C4;
+    --caution-bg:#F3E5C6;
     --danger:#B23A2E;
-    --danger-bg:#F5DCD6;
+    --danger-bg:#F6DDD7;
     --severe:#6E1C22;
-    --severe-bg:#E9C7C4;
-    --sogan:#8B4A2B;
-    --indigo:#2E3F5C;
-    --kawung-wm: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%238B4A2B' stroke-width='1' opacity='0.07'%3E%3Cellipse cx='-20' cy='-40' rx='10' ry='16'/%3E%3Cellipse cx='0' cy='-20' rx='16' ry='10'/%3E%3Cellipse cx='-20' cy='0' rx='10' ry='16'/%3E%3Cellipse cx='-40' cy='-20' rx='16' ry='10'/%3E%3Ccircle cx='-20' cy='-20' r='2.5'/%3E%3Cellipse cx='20' cy='-40' rx='10' ry='16'/%3E%3Cellipse cx='40' cy='-20' rx='16' ry='10'/%3E%3Cellipse cx='20' cy='0' rx='10' ry='16'/%3E%3Cellipse cx='0' cy='-20' rx='16' ry='10'/%3E%3Ccircle cx='20' cy='-20' r='2.5'/%3E%3Cellipse cx='60' cy='-40' rx='10' ry='16'/%3E%3Cellipse cx='80' cy='-20' rx='16' ry='10'/%3E%3Cellipse cx='60' cy='0' rx='10' ry='16'/%3E%3Cellipse cx='40' cy='-20' rx='16' ry='10'/%3E%3Ccircle cx='60' cy='-20' r='2.5'/%3E%3Cellipse cx='-20' cy='0' rx='10' ry='16'/%3E%3Cellipse cx='0' cy='20' rx='16' ry='10'/%3E%3Cellipse cx='-20' cy='40' rx='10' ry='16'/%3E%3Cellipse cx='-40' cy='20' rx='16' ry='10'/%3E%3Ccircle cx='-20' cy='20' r='2.5'/%3E%3Cellipse cx='20' cy='0' rx='10' ry='16'/%3E%3Cellipse cx='40' cy='20' rx='16' ry='10'/%3E%3Cellipse cx='20' cy='40' rx='10' ry='16'/%3E%3Cellipse cx='0' cy='20' rx='16' ry='10'/%3E%3Ccircle cx='20' cy='20' r='2.5'/%3E%3Cellipse cx='60' cy='0' rx='10' ry='16'/%3E%3Cellipse cx='80' cy='20' rx='16' ry='10'/%3E%3Cellipse cx='60' cy='40' rx='10' ry='16'/%3E%3Cellipse cx='40' cy='20' rx='16' ry='10'/%3E%3Ccircle cx='60' cy='20' r='2.5'/%3E%3Cellipse cx='-20' cy='40' rx='10' ry='16'/%3E%3Cellipse cx='0' cy='60' rx='16' ry='10'/%3E%3Cellipse cx='-20' cy='80' rx='10' ry='16'/%3E%3Cellipse cx='-40' cy='60' rx='16' ry='10'/%3E%3Ccircle cx='-20' cy='60' r='2.5'/%3E%3Cellipse cx='20' cy='40' rx='10' ry='16'/%3E%3Cellipse cx='40' cy='60' rx='16' ry='10'/%3E%3Cellipse cx='20' cy='80' rx='10' ry='16'/%3E%3Cellipse cx='0' cy='60' rx='16' ry='10'/%3E%3Ccircle cx='20' cy='60' r='2.5'/%3E%3Cellipse cx='60' cy='40' rx='10' ry='16'/%3E%3Cellipse cx='80' cy='60' rx='16' ry='10'/%3E%3Cellipse cx='60' cy='80' rx='10' ry='16'/%3E%3Cellipse cx='40' cy='60' rx='16' ry='10'/%3E%3Ccircle cx='60' cy='60' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
-    --kawung-border: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%238B4A2B' stroke-width='1.3' opacity='0.55'%3E%3Cellipse cx='-20' cy='-40' rx='10' ry='16'/%3E%3Cellipse cx='0' cy='-20' rx='16' ry='10'/%3E%3Cellipse cx='-20' cy='0' rx='10' ry='16'/%3E%3Cellipse cx='-40' cy='-20' rx='16' ry='10'/%3E%3Ccircle cx='-20' cy='-20' r='2.5'/%3E%3Cellipse cx='20' cy='-40' rx='10' ry='16'/%3E%3Cellipse cx='40' cy='-20' rx='16' ry='10'/%3E%3Cellipse cx='20' cy='0' rx='10' ry='16'/%3E%3Cellipse cx='0' cy='-20' rx='16' ry='10'/%3E%3Ccircle cx='20' cy='-20' r='2.5'/%3E%3Cellipse cx='60' cy='-40' rx='10' ry='16'/%3E%3Cellipse cx='80' cy='-20' rx='16' ry='10'/%3E%3Cellipse cx='60' cy='0' rx='10' ry='16'/%3E%3Cellipse cx='40' cy='-20' rx='16' ry='10'/%3E%3Ccircle cx='60' cy='-20' r='2.5'/%3E%3Cellipse cx='-20' cy='0' rx='10' ry='16'/%3E%3Cellipse cx='0' cy='20' rx='16' ry='10'/%3E%3Cellipse cx='-20' cy='40' rx='10' ry='16'/%3E%3Cellipse cx='-40' cy='20' rx='16' ry='10'/%3E%3Ccircle cx='-20' cy='20' r='2.5'/%3E%3Cellipse cx='20' cy='0' rx='10' ry='16'/%3E%3Cellipse cx='40' cy='20' rx='16' ry='10'/%3E%3Cellipse cx='20' cy='40' rx='10' ry='16'/%3E%3Cellipse cx='0' cy='20' rx='16' ry='10'/%3E%3Ccircle cx='20' cy='20' r='2.5'/%3E%3Cellipse cx='60' cy='0' rx='10' ry='16'/%3E%3Cellipse cx='80' cy='20' rx='16' ry='10'/%3E%3Cellipse cx='60' cy='40' rx='10' ry='16'/%3E%3Cellipse cx='40' cy='20' rx='16' ry='10'/%3E%3Ccircle cx='60' cy='20' r='2.5'/%3E%3Cellipse cx='-20' cy='40' rx='10' ry='16'/%3E%3Cellipse cx='0' cy='60' rx='16' ry='10'/%3E%3Cellipse cx='-20' cy='80' rx='10' ry='16'/%3E%3Cellipse cx='-40' cy='60' rx='16' ry='10'/%3E%3Ccircle cx='-20' cy='60' r='2.5'/%3E%3Cellipse cx='20' cy='40' rx='10' ry='16'/%3E%3Cellipse cx='40' cy='60' rx='16' ry='10'/%3E%3Cellipse cx='20' cy='80' rx='10' ry='16'/%3E%3Cellipse cx='0' cy='60' rx='16' ry='10'/%3E%3Ccircle cx='20' cy='60' r='2.5'/%3E%3Cellipse cx='60' cy='40' rx='10' ry='16'/%3E%3Cellipse cx='80' cy='60' rx='16' ry='10'/%3E%3Cellipse cx='60' cy='80' rx='10' ry='16'/%3E%3Cellipse cx='40' cy='60' rx='16' ry='10'/%3E%3Ccircle cx='60' cy='60' r='2.5'/%3E%3C/g%3E%3C/svg%3E");
+    --severe-bg:#EAC9C6;
+    --pattern:#8B4A2B;
+    --tile-filter:sepia(14%) saturate(80%) brightness(102%);
+    --m-kawung:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23000' stroke-width='1'%3E%3Cellipse cx='24' cy='12' rx='9' ry='14'/%3E%3Cellipse cx='36' cy='24' rx='14' ry='9'/%3E%3Cellipse cx='24' cy='36' rx='9' ry='14'/%3E%3Cellipse cx='12' cy='24' rx='14' ry='9'/%3E%3Ccircle cx='24' cy='24' r='2'/%3E%3C/g%3E%3C/svg%3E");
+    --m-zigzag:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='10' viewBox='0 0 24 10'%3E%3Cpath d='M0 10 L6 0 L12 10 L18 0 L24 10' fill='none' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E");
+    --m-ceplok:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M9 1 L17 9 L9 17 L1 9 Z' fill='none' stroke='%23000' stroke-width='1.1'/%3E%3Ccircle cx='9' cy='9' r='1.7'/%3E%3C/svg%3E");
+  }
+  :root[data-theme="dark"]{
+    --paper:#131A20;
+    --paper-dim:#1A232C;
+    --card:#182129;
+    --ink:#F1E8D6;
+    --ink-soft:#A79C87;
+    --line:#34414E;
+    --line-soft:#27323D;
+    --sogan:#D08A5E;
+    --nila:#8FB0DC;
+    --emas:#DCB45E;
+    --sun:#F08148;
+    --safe:#8FC79A;
+    --safe-bg:#1D2A21;
+    --caution:#E0B765;
+    --caution-bg:#2A2417;
+    --danger:#E08573;
+    --danger-bg:#2C1D1A;
+    --severe:#E3A29B;
+    --severe-bg:#2E1A1B;
+    --pattern:#C98A5C;
+    --tile-filter:invert(90%) hue-rotate(180deg) saturate(55%) brightness(95%) contrast(92%);
   }
 
   *{box-sizing:border-box;}
   html{-webkit-text-size-adjust:100%;}
-
   body{
     margin:0;
-    background:var(--paper) var(--kawung-wm);
-    background-size:40px 40px;
+    background:var(--paper);
     color:var(--ink);
     font-family:'Inter',sans-serif;
-    line-height:1.5;
+    font-size:15px;
+    line-height:1.55;
     min-height:100vh;
   }
-
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
   }
 
-  .wrap{
-    max-width:640px;
-    margin:0 auto;
-    padding:28px 20px 60px;
+  .bg-kawung{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-color:var(--pattern);
+    opacity:.07;
+    -webkit-mask-image:var(--m-kawung); mask-image:var(--m-kawung);
+    -webkit-mask-size:48px 48px; mask-size:48px 48px;
   }
+  .page{position:relative; z-index:1; max-width:720px; margin:0 auto; padding:20px 18px 64px;}
+
+  /* ---------- tipografi & util ---------- */
+  .kicker{
+    font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .num{font-family:'Fraunces',serif; font-variant-numeric:tabular-nums;}
 
   /* ---------- header ---------- */
-  header{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:16px;
-    margin-bottom:0;
-    padding-bottom:18px;
+  .site-head{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:6px 0 14px;}
+  .brand{display:flex; align-items:center; gap:12px;}
+  .seal{width:44px; height:44px; color:var(--sogan); flex:none;}
+  .brand-name{font-family:'Fraunces',serif; font-size:27px; font-weight:700; line-height:1; letter-spacing:.01em;}
+  .brand-name span{color:var(--sun);}
+  .brand-sub{font-size:11.5px; color:var(--ink-soft); margin-top:3px; letter-spacing:.02em;}
+  .head-actions{display:flex; gap:8px;}
+  .icon-btn{
+    width:38px; height:38px; display:grid; place-items:center;
+    background:none; border:1px solid var(--line); color:var(--ink); cursor:pointer;
+    transition:background .2s ease, border-color .2s ease;
   }
-  .header-motif{
-    height:14px;
-    background-image:var(--kawung-border);
-    background-size:28px 28px;
-    background-repeat:repeat-x;
-    background-position:center;
-    border-top:1px solid var(--line);
-    border-bottom:1px solid var(--line);
-    margin-bottom:28px;
-  }
-  .brand-block{ display:flex; flex-direction:column; gap:2px; }
-  .brand{
-    font-family:'Fraunces',serif;
-    font-size:24px;
-    font-weight:700;
-    letter-spacing:0.01em;
-  }
-  .brand span{ color:var(--sun); }
-  .brand-full{
-    font-size:11.5px;
-    color:var(--ink-soft);
-    letter-spacing:0.01em;
-  }
-  .locale{
-    text-align:right;
-    font-size:13px;
-    color:var(--ink-soft);
-    line-height:1.4;
-    max-width:180px;
+  .icon-btn:hover{background:var(--paper-dim);}
+  .icon-btn:focus-visible{outline:2px solid var(--sun); outline-offset:2px;}
+  .icon-btn svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round;}
+  .icon-btn.is-on{background:var(--sogan); border-color:var(--sogan); color:#fff;}
+
+  .band{
+    height:11px; margin:0 0 22px;
+    background-color:var(--sogan); opacity:.55;
+    -webkit-mask-image:var(--m-zigzag); mask-image:var(--m-zigzag);
+    -webkit-mask-size:24px 10px; mask-size:24px 10px;
+    -webkit-mask-repeat:repeat-x; mask-repeat:repeat-x;
   }
 
-  /* ---------- verdict band ---------- */
-  .verdict{
-    border:1px solid var(--line);
-    background:var(--paper-dim);
-    padding:28px 24px;
-    margin-bottom:24px;
-    position:relative;
-    overflow:hidden;
+  /* ---------- kartu ---------- */
+  .card{
+    position:relative; background:var(--card); border:1px solid var(--line);
+    border-top:3px solid var(--accent, var(--sogan));
+    padding:18px; margin-bottom:18px; overflow:hidden;
   }
+  .card::after{
+    content:''; position:absolute; top:0; right:0; width:78px; height:78px; pointer-events:none;
+    background-color:var(--accent, var(--sogan)); opacity:.10;
+    -webkit-mask-image:var(--m-kawung); mask-image:var(--m-kawung);
+    -webkit-mask-size:48px 48px; mask-size:48px 48px;
+  }
+  .card-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:14px; flex-wrap:wrap;}
+  .card-title{font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft);}
+
+  /* ---------- state ---------- */
+  .state{text-align:center; padding:64px 20px; color:var(--ink-soft);}
+  .state.error{color:var(--danger);}
+  .spinner{width:22px; height:22px; margin:0 auto 16px; border:2px solid var(--line); border-top-color:var(--sun); border-radius:50%; animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .hidden{display:none !important;}
+
+  .banner{
+    display:flex; gap:10px; align-items:flex-start;
+    border:1px solid var(--caution); background:var(--caution-bg); color:var(--caution);
+    padding:10px 14px; margin-bottom:16px; font-size:13.5px;
+  }
+  .banner svg{width:16px; height:16px; flex:none; margin-top:2px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round;}
+
+  /* ---------- verdict ---------- */
+  .verdict{--accent:var(--sogan); border:1px solid var(--line); border-top:3px solid var(--accent); background:var(--card); padding:26px 24px 24px; margin-bottom:18px; position:relative; overflow:hidden;}
+  .verdict.safe{--accent:var(--safe); background:var(--safe-bg); border-color:#c9d8c0;}
+  .verdict.caution{--accent:var(--caution); background:var(--caution-bg); border-color:#e2cf9c;}
+  .verdict.danger{--accent:var(--danger); background:var(--danger-bg); border-color:#e8b9b0;}
+  .verdict.severe{--accent:var(--severe); background:var(--severe-bg); border-color:#d8a09a;}
   .verdict::after{
-    content:'';
-    position:absolute;
-    top:-30px; right:-30px;
-    width:140px; height:140px;
-    background-image:var(--kawung-border);
-    background-size:35px 35px;
-    opacity:0.35;
-    mask-image:radial-gradient(circle at top right, black 0%, black 40%, transparent 75%);
-    -webkit-mask-image:radial-gradient(circle at top right, black 0%, black 40%, transparent 75%);
-    pointer-events:none;
+    content:''; position:absolute; top:-34px; right:-34px; width:190px; height:190px; pointer-events:none;
+    background-color:var(--accent); opacity:.12;
+    -webkit-mask-image:var(--m-kawung); mask-image:var(--m-kawung);
+    -webkit-mask-size:48px 48px; mask-size:48px 48px;
   }
-  .verdict.safe{ background:var(--safe-bg); border-color:#c7d6bd; }
-  .verdict.caution{ background:var(--caution-bg); border-color:#e0cd98; }
-  .verdict.danger{ background:var(--danger-bg); border-color:#e6b6ac; }
-  .verdict.severe{ background:var(--severe-bg); border-color:#d69b95; }
+  .verdict-eyebrow{display:flex; align-items:center; gap:8px; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:12px;}
+  .verdict-eyebrow .dot{width:7px; height:7px; border-radius:50%; background:var(--accent); flex:none;}
+  .verdict-title{font-family:'Fraunces',serif; font-size:clamp(28px,7vw,40px); font-weight:600; line-height:1.06; letter-spacing:-.01em; margin:0 0 10px; color:var(--accent); position:relative;}
+  .verdict-detail{font-size:15px; color:var(--ink); max-width:52ch; margin:0; position:relative;}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; position:relative;}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:500;
+    border:1px solid var(--line); background:rgba(255,255,255,.45); color:var(--ink);
+    padding:4px 10px;
+  }
+  :root[data-theme="dark"] .chip{background:rgba(0,0,0,.2);}
+  .chip b{font-family:'Fraunces',serif; font-weight:600;}
+  .chip.is-accent{border-color:var(--accent); color:var(--accent);}
 
-  .verdict-eyebrow{
-    font-size:13px;
-    color:var(--ink-soft);
-    margin-bottom:10px;
-    position:relative;
-    z-index:1;
+  /* ---------- gauge ---------- */
+  .gauges{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;}
+  @media (max-width:520px){ .gauges{grid-template-columns:1fr;}}
+  .gauge{--accent:var(--sogan); background:var(--card); border:1px solid var(--line); border-top:3px solid var(--accent); padding:16px 16px 14px; position:relative; overflow:hidden;}
+  .gauge::after{
+    content:''; position:absolute; right:0; bottom:0; width:64px; height:64px; pointer-events:none;
+    background-color:var(--accent); opacity:.10;
+    -webkit-mask-image:var(--m-kawung); mask-image:var(--m-kawung);
+    -webkit-mask-size:48px 48px; mask-size:48px 48px;
   }
-  .verdict-eyebrow .dot{
-    display:inline-block;
-    width:7px; height:7px;
-    border-radius:50%;
-    background:currentColor;
-    margin-right:7px;
-    vertical-align:middle;
-  }
-  .verdict-title{
-    font-family:'Fraunces',serif;
-    font-size:clamp(30px,7vw,42px);
-    font-weight:600;
-    line-height:1.05;
-    letter-spacing:-0.01em;
-    margin:0 0 10px;
-    position:relative;
-    z-index:1;
-  }
-  .verdict.safe .verdict-title{ color:var(--safe); }
-  .verdict.caution .verdict-title{ color:var(--caution); }
-  .verdict.danger .verdict-title{ color:var(--danger); }
-  .verdict.severe .verdict-title{ color:var(--severe); }
+  .gauge.safe{--accent:var(--safe);} .gauge.caution{--accent:var(--caution);}
+  .gauge.danger{--accent:var(--danger);} .gauge.severe{--accent:var(--severe);}
+  .gauge-label{display:flex; align-items:baseline; justify-content:space-between; gap:8px; font-size:12px; color:var(--ink-soft);}
+  .gauge-label b{color:var(--ink); font-weight:600; font-size:12.5px; letter-spacing:.04em; text-transform:uppercase;}
+  .gauge-value-row{display:flex; align-items:baseline; gap:7px; margin:8px 0 10px;}
+  .gauge-value{font-family:'Fraunces',serif; font-size:44px; font-weight:600; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums;}
+  .gauge-unit{font-size:12px; color:var(--ink-soft);}
+  .meter{height:6px; background:var(--paper-dim); position:relative; overflow:hidden;}
+  .meter-fill{height:100%; width:0; background:var(--accent); transition:width .6s ease, background .3s ease;}
+  .gauge-note{font-size:12px; color:var(--ink-soft); margin-top:9px; min-height:2.6em;}
 
-  .verdict-detail{
-    font-size:15.5px;
-    color:var(--ink);
-    max-width:46ch;
-    position:relative;
-    z-index:1;
-  }
+  /* ---------- stat strip ---------- */
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--line); background:var(--card); margin-bottom:18px;}
+  @media (max-width:560px){ .stats{grid-template-columns:repeat(2,1fr);} }
+  .stat{padding:12px 13px; border-right:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft); position:relative;}
+  .stat:nth-child(4n){border-right:none;}
+  @media (max-width:560px){ .stat:nth-child(2n){border-right:none;} }
+  .stat:nth-last-child(-n+4){border-bottom:none;}
+  @media (max-width:560px){ .stat:nth-last-child(-n+4){border-bottom:1px solid var(--line-soft);} .stat:nth-last-child(-n+2){border-bottom:none;} }
+  .stat-k{display:block; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft);}
+  .stat-v{display:block; font-family:'Fraunces',serif; font-size:19px; font-weight:500; margin-top:3px; font-variant-numeric:tabular-nums;}
+  .stat-n{display:block; font-size:11.5px; color:var(--ink-soft);}
 
-  /* ---------- gauges ---------- */
-  .gauges{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:14px;
-    margin-bottom:24px;
-  }
-  @media (max-width:480px){
-    .gauges{ grid-template-columns:1fr; }
-  }
-  .gauge{
-    border:1px solid var(--line);
-    border-top:3px solid var(--sogan);
-    padding:20px 18px 18px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
-  .gauge-label{
-    font-size:12.5px;
-    color:var(--ink-soft);
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-  }
-  .gauge-label b{
-    color:var(--ink);
-    font-weight:600;
-  }
-  .gauge-value-row{
-    display:flex;
-    align-items:baseline;
-    gap:8px;
-  }
-  .gauge-value{
-    font-family:'Fraunces',serif;
-    font-size:48px;
-    font-weight:600;
-    line-height:1;
-    letter-spacing:-0.02em;
-  }
-  .gauge-unit{
-    font-size:13px;
-    color:var(--ink-soft);
-  }
-  .gauge-band{
-    font-size:13.5px;
-    font-weight:600;
-    padding:3px 0;
-  }
-  .gauge.safe .gauge-band{ color:var(--safe); }
-  .gauge.caution .gauge-band{ color:var(--caution); }
-  .gauge.danger .gauge-band{ color:var(--danger); }
-  .gauge.severe .gauge-band{ color:var(--severe); }
+  /* ---------- peta ---------- */
+  #map{height:320px; width:100%; background:var(--paper-dim);}
+  /* filter hanya di tile, supaya warna penanda tidak ikut terbalik di mode gelap */
+  #map .leaflet-tile-pane{filter:var(--tile-filter);}
+  .leaflet-bar a{background:var(--card); color:var(--ink); border-bottom-color:var(--line);}
+  .leaflet-bar a:hover{background:var(--paper-dim);}
+  .leaflet-control-attribution{background:color-mix(in srgb, var(--card) 88%, transparent) !important; color:var(--ink-soft);}
+  .leaflet-control-attribution a{color:var(--ink-soft);}
+  .leaflet-container{font-family:'Inter',sans-serif;}
+  .leaflet-popup-content-wrapper{background:var(--card); color:var(--ink); border-radius:0; border:1px solid var(--line); box-shadow:0 6px 22px rgba(0,0,0,.16);}
+  .leaflet-popup-tip{background:var(--card); border:1px solid var(--line);}
+  .leaflet-popup-content{margin:11px 13px; font-size:13px; line-height:1.5;}
+  .leaflet-container a.leaflet-popup-close-button{color:var(--ink-soft);}
+  .popup-name{font-family:'Fraunces',serif; font-weight:600; font-size:15px; display:block; margin-bottom:2px;}
+  .popup-desc{color:var(--ink-soft); font-size:12px; display:block;}
+  .popup-reading{color:var(--ink-soft); font-size:12.5px; display:block; margin-top:5px;}
+  .popup-reading b{color:var(--ink); font-family:'Fraunces',serif; font-size:14px;}
+  .marker-pin{display:flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:2px solid var(--card); box-shadow:0 1px 4px rgba(0,0,0,.35);}
+  .marker-pin-dot{width:7px; height:7px; background:var(--card); border-radius:50%; transform:rotate(45deg);}
+  .marker-pin.you{background:var(--sun);}
+  .marker-pin.ref{background:var(--ink-soft);}
+  .marker-pin.level-safe{background:var(--safe);} .marker-pin.level-caution{background:var(--caution);}
+  .marker-pin.level-danger{background:var(--danger);} .marker-pin.level-severe{background:var(--severe);}
+  .marker-me{width:22px; height:22px; border-radius:50%; border:2px dashed var(--nila); background:rgba(46,63,92,.25); box-shadow:0 0 0 3px rgba(46,63,92,.15);}
 
-  .meter{
-    height:6px;
-    background:#EEE4CC;
-    position:relative;
-    margin-top:2px;
-  }
-  .meter-fill{
-    height:100%;
-    background:var(--ink);
-    transition:width 0.6s ease, background 0.6s ease;
-  }
-  .gauge.safe .meter-fill{ background:var(--safe); }
-  .gauge.caution .meter-fill{ background:var(--caution); }
-  .gauge.danger .meter-fill{ background:var(--danger); }
-  .gauge.severe .meter-fill{ background:var(--severe); }
+  .legend{display:flex; flex-wrap:wrap; gap:14px; font-size:11.5px; color:var(--ink-soft);}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .legend-dot{width:8px; height:8px; border-radius:50%; display:inline-block; flex:none;}
+  .legend-dot.you{background:var(--sun);} .legend-dot.ref{background:var(--ink-soft);}
+  .legend-dot.me{background:transparent; border:2px dashed var(--nila);}
+  .legend-line{display:inline-block; width:14px; height:0; border-top:2.5px solid;}
+  .legend-line.uv{border-color:var(--sun);}
+  .legend-line.aqi{border-color:var(--nila);}
 
-  /* ---------- map ---------- */
-  .map-section{
-    border:1px solid var(--line);
-    border-top:3px solid var(--indigo);
-    margin-bottom:24px;
-    overflow:hidden;
+  .point-list{margin-top:14px; border-top:1px solid var(--line-soft);}
+  .point{
+    width:100%; display:flex; align-items:center; gap:12px; text-align:left;
+    background:none; border:none; border-bottom:1px solid var(--line-soft);
+    padding:11px 2px; cursor:pointer; color:inherit; font:inherit;
   }
-  .map-header{
-    padding:16px 18px 14px;
-    border-bottom:1px solid var(--line);
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-  }
-  .map-title{
-    font-size:12.5px;
-    color:var(--ink-soft);
-  }
-  .map-legend{
-    display:flex;
-    flex-wrap:wrap;
-    gap:14px;
-    font-size:11.5px;
-    color:var(--ink-soft);
-  }
-  .map-legend span{
-    display:inline-flex;
-    align-items:center;
-    gap:5px;
-    white-space:nowrap;
-  }
-  .legend-dot{
-    width:8px; height:8px;
-    border-radius:50%;
-    display:inline-block;
-    flex-shrink:0;
-  }
-  .legend-dot.you{ background:var(--sun); }
-  .legend-dot.ref{ background:var(--ink-soft); }
+  .point:hover{background:var(--paper-dim);}
+  .point:focus-visible{outline:2px solid var(--sun); outline-offset:-2px;}
+  .point:last-child{border-bottom:none;}
+  .point-bar{width:4px; align-self:stretch; min-height:34px; background:var(--accent, var(--ink-soft)); flex:none;}
+  .point.safe{--accent:var(--safe);} .point.caution{--accent:var(--caution);}
+  .point.danger{--accent:var(--danger);} .point.severe{--accent:var(--severe);}
+  .point.is-primary .point-name{font-weight:700;}
+  .point-info{flex:1; min-width:0;}
+  .point-name{font-size:14px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .point-desc{font-size:11.5px; color:var(--ink-soft); display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .point-vals{display:flex; gap:12px; font-size:12px; color:var(--ink-soft); flex:none; font-variant-numeric:tabular-nums;}
+  .point-vals b{font-family:'Fraunces',serif; font-size:15px; color:var(--ink); font-weight:600; display:block; text-align:right; line-height:1.1;}
+  .point-vals i{font-style:normal; font-size:10px; letter-spacing:.06em; text-transform:uppercase;}
 
-  #map{
-    height:340px;
-    width:100%;
-    background:var(--paper-dim);
-    filter:sepia(8%) saturate(88%) brightness(101%);
+  /* ---------- chart ---------- */
+  .chart-holder{position:relative;}
+  #chartWrap svg{display:block; width:100%; height:auto;}
+  .chart-tip{
+    position:absolute; pointer-events:none; z-index:5;
+    background:var(--card); border:1px solid var(--line); box-shadow:0 4px 14px rgba(0,0,0,.14);
+    padding:7px 10px; font-size:12px; min-width:96px; transform:translate(-50%,-112%); line-height:1.45;
   }
-  .leaflet-popup-content-wrapper{
-    background:var(--paper);
-    color:var(--ink);
-    border-radius:0;
-    border:1px solid var(--line);
-    box-shadow:none;
-  }
-  .leaflet-popup-tip{
-    background:var(--paper);
-    border:1px solid var(--line);
-  }
-  .leaflet-popup-content{
-    font-family:'Inter',sans-serif;
-    font-size:13px;
-    margin:10px 12px;
-    line-height:1.5;
-  }
-  .popup-name{
-    font-family:'Fraunces',serif;
-    font-weight:600;
-    font-size:15px;
-    margin-bottom:4px;
-    display:block;
-  }
-  .popup-reading{
-    color:var(--ink-soft);
-    font-size:12.5px;
-  }
-  .popup-reading b{ color:var(--ink); }
-  .leaflet-container a.leaflet-popup-close-button{
-    color:var(--ink-soft);
-  }
-  .marker-pin{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:26px; height:26px;
-    border-radius:50% 50% 50% 0;
-    transform:rotate(-45deg);
-    border:2px solid var(--paper);
-    box-shadow:0 1px 4px rgba(0,0,0,0.35);
-  }
-  .marker-pin.you{ background:var(--sun); }
-  .marker-pin.ref{ background:var(--ink-soft); }
-  .marker-pin.ref.level-safe{ background:var(--safe); }
-  .marker-pin.ref.level-caution{ background:var(--caution); }
-  .marker-pin.ref.level-danger{ background:var(--danger); }
-  .marker-pin.ref.level-severe{ background:var(--severe); }
-  .marker-pin-dot{
-    width:7px; height:7px;
-    background:var(--paper);
-    border-radius:50%;
-    transform:rotate(45deg);
-  }
-  .map-footnote{
-    padding:12px 18px 16px;
-    font-size:12px;
-    color:var(--ink-soft);
-  }
+  .chart-tip b{font-family:'Fraunces',serif; font-size:13px;}
+  .chart-tip .tip-row{display:flex; justify-content:space-between; gap:10px; color:var(--ink-soft);}
+  .chart-tip .tip-row b{color:var(--ink);}
+  .axis-label{font-size:11.5px; fill:var(--ink-soft); font-family:'Inter',sans-serif;}
+  .axis-title{font-size:12px; font-family:'Inter',sans-serif; font-weight:600; letter-spacing:.08em;}
+  .now-label{font-size:12px; font-weight:600; fill:var(--ink); font-family:'Inter',sans-serif;}
+  .chart-footnote{font-size:11.5px; color:var(--ink-soft); margin-top:8px; display:flex; flex-wrap:wrap; gap:6px 16px;}
 
-  /* ---------- trend chart ---------- */
-  .chart-section{
-    border:1px solid var(--line);
-    border-top:3px solid var(--sogan);
-    padding:18px 18px 14px;
-    margin-bottom:24px;
+  /* ---------- hourly strip ---------- */
+  .strip{display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; scroll-snap-type:x proximity;}
+  .strip::-webkit-scrollbar{height:6px;}
+  .strip::-webkit-scrollbar-thumb{background:var(--line); }
+  .hour{
+    flex:none; width:82px; scroll-snap-align:start;
+    border:1px solid var(--line); border-top:2px solid var(--accent, var(--line));
+    background:var(--paper-dim); padding:9px 8px; text-align:center;
   }
-  .chart-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-    gap:12px;
-    margin-bottom:14px;
-    flex-wrap:wrap;
-  }
-  .chart-title{
-    font-size:12.5px;
-    color:var(--ink-soft);
-  }
-  .chart-legend{
-    display:flex;
-    gap:14px;
-    font-size:11.5px;
-    color:var(--ink-soft);
-  }
-  .chart-legend span{
-    display:inline-flex;
-    align-items:center;
-    gap:5px;
-  }
-  .legend-line{
-    display:inline-block;
-    width:14px;
-    height:0;
-    border-top:2.5px solid;
-  }
-  .legend-line.uv{ border-color:var(--sun); }
-  .legend-line.aqi{ border-color:var(--indigo); }
-  #chartWrap svg{ display:block; width:100%; height:auto; }
-  .chart-footnote{
-    font-size:11.5px;
-    color:var(--ink-soft);
-    margin-top:8px;
-  }
-  .chart-axis-label{
-    font-size:9.5px;
-    fill:var(--ink-soft);
-    font-family:'Inter',sans-serif;
-  }
-  .chart-now-label{
-    font-size:10px;
-    font-weight:600;
-    fill:var(--ink);
-    font-family:'Inter',sans-serif;
-  }
+  .hour.is-now{border-color:var(--sun); background:var(--card);}
+  .hour.safe{--accent:var(--safe);} .hour.caution{--accent:var(--caution);}
+  .hour.danger{--accent:var(--danger);} .hour.severe{--accent:var(--severe);}
+  .hour-t{display:block; font-size:11.5px; font-weight:600; font-variant-numeric:tabular-nums;}
+  .hour-v{display:block; font-family:'Fraunces',serif; font-size:14px; margin-top:4px; line-height:1.25;}
+  .hour-v i{font-style:normal; font-size:9.5px; letter-spacing:.06em; color:var(--ink-soft); display:block; font-family:'Inter',sans-serif;}
+  .hour-rain{display:block; font-size:10.5px; color:var(--nila); margin-top:3px;}
 
-  /* ---------- pollutant detail ---------- */
-  .detail-section{
-    border:1px solid var(--line);
-    border-top:3px solid var(--sogan);
-    padding:20px 18px;
-    margin-bottom:24px;
-  }
-  .detail-title{
-    font-size:12.5px;
-    color:var(--ink-soft);
-    margin-bottom:14px;
-    padding-bottom:12px;
-    border-bottom:1px solid var(--line);
-  }
-  .pollutant-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:16px 12px;
-  }
-  @media (max-width:420px){
-    .pollutant-grid{ grid-template-columns:repeat(2,1fr); }
-  }
-  .pollutant{
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-  }
-  .pollutant-name{
-    font-size:11.5px;
-    color:var(--ink-soft);
-  }
-  .pollutant-value{
-    font-family:'Fraunces',serif;
-    font-size:20px;
-    font-weight:500;
-  }
+  /* ---------- best window ---------- */
+  .best{display:flex; gap:16px; align-items:center; flex-wrap:wrap;}
+  .best-time{font-family:'Fraunces',serif; font-size:30px; font-weight:600; line-height:1.1; letter-spacing:-.01em; color:var(--accent, var(--safe)); font-variant-numeric:tabular-nums;}
+  .best-text{flex:1; min-width:210px; font-size:14px; color:var(--ink); margin:0;}
+  .best.is-none{--accent:var(--danger);}
 
-  /* ---------- advice list ---------- */
-  .advice{
-    margin-bottom:24px;
-  }
-  .advice-title{
-    font-size:12.5px;
-    color:var(--ink-soft);
-    margin-bottom:12px;
-  }
-  .advice ul{
-    list-style:none;
-    margin:0; padding:0;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
-  .advice li{
-    padding-left:20px;
-    position:relative;
-    font-size:14.5px;
-  }
-  .advice li::before{
-    content:'-';
-    position:absolute;
-    left:0;
-    color:var(--ink-soft);
-  }
+  /* ---------- polutan ---------- */
+  .poll-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px 14px;}
+  @media (max-width:520px){ .poll-grid{grid-template-columns:repeat(2,1fr);} }
+  .poll{min-width:0;}
+  .poll-top{display:flex; align-items:baseline; justify-content:space-between; gap:6px;}
+  .poll-name{font-size:11.5px; color:var(--ink-soft);}
+  .poll-value{font-family:'Fraunces',serif; font-size:20px; font-weight:500; font-variant-numeric:tabular-nums;}
+  .poll-bar{height:4px; background:var(--paper-dim); margin-top:6px; position:relative;}
+  .poll-bar i{position:absolute; left:0; top:0; bottom:0; background:var(--accent, var(--sogan)); display:block;}
+  .poll-note{font-size:10.5px; color:var(--ink-soft); margin-top:4px; display:block;}
 
-  /* ---------- footer / meta ---------- */
-  footer{
-    padding-top:16px;
-    font-size:12px;
-    color:var(--ink-soft);
-    display:flex;
-    justify-content:space-between;
-    flex-wrap:wrap;
-    gap:8px;
-  }
-  .footer-motif{
-    height:14px;
-    background-image:var(--kawung-border);
-    background-size:28px 28px;
-    background-repeat:repeat-x;
-    background-position:center;
-    border-top:1px solid var(--line);
-    border-bottom:1px solid var(--line);
-    margin-top:8px;
-  }
-  footer a{ color:var(--ink-soft); }
-  .refresh-btn{
-    background:none;
-    border:1px solid var(--line);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    font-size:13px;
-    padding:8px 14px;
-    cursor:pointer;
-  }
-  .refresh-btn:hover{ background:var(--paper-dim); }
-  .refresh-btn:focus-visible, a:focus-visible, button:focus-visible{
-    outline:2px solid var(--sun);
-    outline-offset:2px;
-  }
-  .refresh-row{
-    text-align:center;
-    margin-bottom:24px;
-  }
+  /* ---------- saran ---------- */
+  .advice-group{margin-bottom:14px;}
+  .advice-group:last-child{margin-bottom:0;}
+  .advice-group h3{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 8px; font-weight:600;}
+  .advice ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
+  .advice li{padding-left:18px; position:relative; font-size:14px;}
+  .advice li::before{content:''; position:absolute; left:0; top:8px; width:8px; height:8px; background-color:var(--sogan); opacity:.7;
+    -webkit-mask-image:var(--m-ceplok); mask-image:var(--m-ceplok);
+    -webkit-mask-size:18px 18px; mask-size:18px 18px;}
 
-  /* ---------- states ---------- */
-  .loading, .error{
-    text-align:center;
-    padding:60px 20px;
-    color:var(--ink-soft);
+  /* ---------- aksi ---------- */
+  .actions{display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap; margin:4px 0 18px;}
+  .btn{
+    background:none; border:1px solid var(--line); color:var(--ink);
+    font-family:'Inter',sans-serif; font-size:13px; padding:9px 16px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px;
   }
-  .error{ color:var(--danger); }
-  .spinner{
-    width:22px; height:22px;
-    border:2px solid var(--line);
-    border-top-color:var(--sun);
-    border-radius:50%;
-    margin:0 auto 16px;
-    animation:spin 0.8s linear infinite;
-  }
-  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .btn:hover{background:var(--paper-dim);}
+  .btn:focus-visible{outline:2px solid var(--sun); outline-offset:2px;}
+  .btn[disabled]{opacity:.55; cursor:progress;}
+  .btn svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+  .btn.is-loading svg{animation:spin .9s linear infinite;}
+  .meta-line{font-size:11.5px; color:var(--ink-soft); text-align:center; margin-bottom:26px;}
 
-  .hidden{ display:none !important; }
+  /* ---------- lokasi saya ---------- */
+  .loc-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px;}
+  @media (max-width:520px){ .loc-grid{grid-template-columns:1fr 1fr;} }
+  .loc-box{border:1px solid var(--line-soft); background:var(--paper-dim); padding:12px;}
+  .loc-k{font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); display:block;}
+  .loc-v{font-family:'Fraunces',serif; font-size:22px; font-weight:500; font-variant-numeric:tabular-nums;}
+  .loc-note{font-size:12.5px; color:var(--ink-soft); margin-top:10px;}
+
+  /* ---------- footer ---------- */
+  .foot-band{
+    height:11px; margin:0 0 14px;
+    background-color:var(--sogan); opacity:.55;
+    -webkit-mask-image:var(--m-zigzag); mask-image:var(--m-zigzag);
+    -webkit-mask-size:24px 10px; mask-size:24px 10px;
+    -webkit-mask-repeat:repeat-x; mask-repeat:repeat-x;
+  }
+  footer{display:flex; justify-content:space-between; gap:10px 18px; flex-wrap:wrap; font-size:11.5px; color:var(--ink-soft);}
+  footer a{color:var(--ink-soft);}
+  .foot-note{width:100%; font-size:11px; color:var(--ink-soft); opacity:.85; margin-top:6px;}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="bg-kawung" aria-hidden="true"></div>
 
-  <header>
-    <div class="brand-block">
-      <div class="brand">sêm<span>o</span>k</div>
-      <div class="brand-full">Info Lingkungan Semarang</div>
+<div class="page">
+
+  <header class="site-head">
+    <div class="brand">
+      <svg class="seal" viewBox="0 0 48 48" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.3">
+          <ellipse cx="24" cy="11" rx="7" ry="11"/>
+          <ellipse cx="37" cy="24" rx="11" ry="7"/>
+          <ellipse cx="24" cy="37" rx="7" ry="11"/>
+          <ellipse cx="11" cy="24" rx="11" ry="7"/>
+        </g>
+        <circle cx="24" cy="24" r="2.4" fill="currentColor"/>
+      </svg>
+      <div>
+        <div class="brand-name">sêm<span>o</span>k</div>
+        <div class="brand-sub">Info UV &amp; udara · Semarang</div>
+      </div>
     </div>
-    <div class="locale">BINUS @Semarang<br>Tawangsari, Semarang Barat</div>
+    <div class="head-actions">
+      <button class="icon-btn" id="locBtn" type="button" title="Cek kondisi di lokasi saya" aria-label="Cek kondisi di lokasi saya">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+      </button>
+      <button class="icon-btn" id="themeBtn" type="button" title="Ganti terang / gelap" aria-label="Ganti terang / gelap">
+        <svg id="themeIcon" viewBox="0 0 24 24"></svg>
+      </button>
+    </div>
   </header>
 
-  <div class="header-motif"></div>
+  <div class="band" aria-hidden="true"></div>
 
-  <div id="loadingState" class="loading">
+  <div id="banner" class="banner hidden" role="status">
+    <svg viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01"/><path d="M10.3 3.9 2.6 17.4A2 2 0 0 0 4.3 20.4h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+    <span id="bannerText"></span>
+  </div>
+
+  <div id="loadingState" class="state">
     <div class="spinner"></div>
     Mengambil data cuaca Semarang Barat...
   </div>
 
-  <div id="errorState" class="error hidden">
+  <div id="errorState" class="state error hidden">
     <p id="errorMessage">Tidak bisa ambil data cuaca.</p>
-    <button class="refresh-btn" onclick="loadData()">Coba lagi</button>
+    <button class="btn" type="button" onclick="loadData()">Coba lagi</button>
   </div>
 
-  <div id="content" class="hidden">
+  <main id="content" class="hidden">
 
-    <div class="verdict" id="verdictBand">
-      <div class="verdict-eyebrow"><span class="dot"></span><span id="verdictEyebrow">Saat ini</span></div>
-      <div class="verdict-title" id="verdictTitle">-</div>
-      <div class="verdict-detail" id="verdictDetail">-</div>
-    </div>
-
-    <div class="map-section">
-      <div class="map-header">
-        <div class="map-title">Data langsung di beberapa titik Semarang</div>
-        <div class="map-legend">
-          <span><span class="legend-dot you"></span>BINUS (utama)</span>
-          <span><span class="legend-dot ref"></span>Warna sesuai tingkat bahaya</span>
-        </div>
-      </div>
-      <div id="map"></div>
-      <div class="map-footnote">Tap titik untuk lihat kondisi di sana. Geser untuk pindah, cubit atau scroll untuk zoom.</div>
-    </div>
+    <section class="verdict" id="verdictBand">
+      <div class="verdict-eyebrow"><span class="dot"></span><span id="verdictEyebrow">-</span></div>
+      <h1 class="verdict-title" id="verdictTitle">-</h1>
+      <p class="verdict-detail" id="verdictDetail">-</p>
+      <div class="chips" id="verdictChips"></div>
+    </section>
 
     <div class="gauges">
       <div class="gauge" id="uvGauge">
         <div class="gauge-label"><b>Indeks UV</b><span id="uvBandLabel">-</span></div>
         <div class="gauge-value-row">
           <div class="gauge-value" id="uvValue">-</div>
-          <div class="gauge-unit">dari 11+</div>
+          <div class="gauge-unit">skala 0–11+</div>
         </div>
-        <div class="meter"><div class="meter-fill" id="uvMeter" style="width:0%"></div></div>
+        <div class="meter"><div class="meter-fill" id="uvMeter"></div></div>
+        <div class="gauge-note" id="uvNote">-</div>
       </div>
 
       <div class="gauge" id="aqiGauge">
@@ -574,413 +439,901 @@
           <div class="gauge-value" id="aqiValue">-</div>
           <div class="gauge-unit">US AQI</div>
         </div>
-        <div class="meter"><div class="meter-fill" id="aqiMeter" style="width:0%"></div></div>
+        <div class="meter"><div class="meter-fill" id="aqiMeter"></div></div>
+        <div class="gauge-note" id="aqiNote">-</div>
       </div>
     </div>
 
-    <div class="chart-section">
-      <div class="chart-header">
-        <div class="chart-title">Grafik UV dan kualitas udara hari ini</div>
-        <div class="chart-legend">
-          <span><span class="legend-line uv"></span>Indeks UV</span>
+    <div class="stats" id="stats"></div>
+
+    <section class="card" style="--accent:var(--nila)">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Peta kondisi Semarang</div>
+          <div style="font-size:12px;color:var(--ink-soft);margin-top:2px">Data langsung di beberapa titik Semarang</div>
+        </div>
+        <div class="legend">
+          <span><span class="legend-dot you"></span>BINUS (utama)</span>
+          <span><span class="legend-dot ref"></span>Warna = tingkat bahaya</span>
+          <span><span class="legend-dot me"></span>Lokasi saya</span>
+        </div>
+      </div>
+      <div id="map"></div>
+      <div class="point-list" id="pointList"></div>
+      <p style="font-size:11.5px;color:var(--ink-soft);margin:10px 0 0">Tap titik di peta atau pilih daftar di bawah. Geser untuk pindah; klik peta dulu baru scroll untuk zoom. Angka bisa sama untuk titik berdekatan karena berasal dari grid model, bukan sensor per titik.</p>
+    </section>
+
+    <section class="card" id="locCard" style="--accent:var(--nila)">
+      <div class="card-head">
+        <div class="card-title">Lokasi saya</div>
+        <button class="btn" type="button" id="locBtn2" style="padding:6px 12px;font-size:12px">Gunakan GPS saya</button>
+      </div>
+      <div class="loc-grid" id="locGrid"></div>
+      <p class="loc-note" id="locNote">Belum diaktifkan. Izinkan akses lokasi untuk melihat kondisi di tempat Anda sekarang.</p>
+    </section>
+
+    <section class="card" style="--accent:var(--sun)">
+      <div class="card-head">
+        <div class="card-title">Tren 24 jam</div>
+        <div class="legend">
+          <span><span class="legend-line uv"></span>UV</span>
           <span><span class="legend-line aqi"></span>AQI</span>
         </div>
       </div>
-      <div id="chartWrap"></div>
-      <div class="chart-footnote">Garis penuh = data yang sudah terjadi. Garis putus-putus = perkiraan sisa hari ini.</div>
-    </div>
-
-    <div class="detail-section">
-      <div class="detail-title">Rincian polutan (µg/m³)</div>
-      <div class="pollutant-grid">
-        <div class="pollutant"><span class="pollutant-name">PM2.5</span><span class="pollutant-value" id="pm25">-</span></div>
-        <div class="pollutant"><span class="pollutant-name">PM10</span><span class="pollutant-value" id="pm10">-</span></div>
-        <div class="pollutant"><span class="pollutant-name">Ozon</span><span class="pollutant-value" id="o3">-</span></div>
-        <div class="pollutant"><span class="pollutant-name">NO₂</span><span class="pollutant-value" id="no2">-</span></div>
-        <div class="pollutant"><span class="pollutant-name">SO₂</span><span class="pollutant-value" id="so2">-</span></div>
-        <div class="pollutant"><span class="pollutant-name">CO</span><span class="pollutant-value" id="co">-</span></div>
+      <div class="chart-holder">
+        <div id="chartWrap"></div>
+        <div class="chart-tip hidden" id="chartTip"></div>
       </div>
+      <div class="chart-footnote">
+        <span>Garis penuh = data yang sudah terjadi, putus-putus = perkiraan sisa hari.</span>
+        <span>Kiri: Indeks UV · Kanan: AQI</span>
+      </div>
+    </section>
+
+    <section class="card" style="--accent:var(--nila)">
+      <div class="card-head">
+        <div class="card-title">Jam-jam berikutnya</div>
+        <div style="font-size:12px;color:var(--ink-soft)">12 jam ke depan</div>
+      </div>
+      <div class="strip" id="hourStrip"></div>
+    </section>
+
+    <section class="card best" id="bestCard" style="--accent:var(--safe)">
+      <div style="flex:none">
+        <div class="kicker" style="margin-bottom:6px">Waktu terbaik keluar</div>
+        <div class="best-time" id="bestTime">-</div>
+      </div>
+      <p class="best-text" id="bestText">-</p>
+    </section>
+
+    <section class="card" style="--accent:var(--sogan)">
+      <div class="card-head">
+        <div class="card-title">Rincian polutan</div>
+        <div style="font-size:12px;color:var(--ink-soft)">µg/m³ · pembanding = pedoman WHO 24 jam</div>
+      </div>
+      <div class="poll-grid" id="pollGrid"></div>
+    </section>
+
+    <section class="card" style="--accent:var(--emas)">
+      <div class="card-head"><div class="card-title">Kalau mau keluar</div></div>
+      <div class="advice">
+        <div class="advice-group">
+          <h3>Soal matahari</h3>
+          <ul id="adviceUv"></ul>
+        </div>
+        <div class="advice-group">
+          <h3>Soal udara</h3>
+          <ul id="adviceAir"></ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="btn" type="button" id="refreshBtn" onclick="loadData()">
+        <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-1.9 6.3"/><path d="M20 4v7h-7"/></svg>
+        Perbarui data
+      </button>
     </div>
+    <p class="meta-line" id="lastUpdated">-</p>
+  </main>
 
-    <div class="advice">
-      <div class="advice-title">Kalau mau keluar</div>
-      <ul id="adviceList"></ul>
-    </div>
-
-    <div class="refresh-row">
-      <button class="refresh-btn" onclick="loadData()">Perbarui data</button>
-    </div>
-
-  </div>
-
-  <div class="footer-motif"></div>
+  <div class="foot-band" aria-hidden="true"></div>
   <footer>
-    <span id="lastUpdated"></span>
-    <span>Sumber data: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></span>
+    <span id="footUpdated">-</span>
+    <span>Sumber data: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> · Tile: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></span>
+    <span class="foot-note">Data UV dihitung dari posisi matahari; kualitas udara berbasis model satelit, jadi anggap sebagai estimasi area, bukan angka presisi per meter.</span>
   </footer>
-
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-  // Tawangsari, Semarang Barat, koordinat terdekat untuk BINUS @Semarang
-  // (POJ Avenue Kav. 3, Kel. Tawangsari, Kec. Semarang Barat, Kota Semarang)
-  const LAT = -6.9804;
-  const LON = 110.3831;
+(function(){
+  'use strict';
 
-  function aqiUrlFor(lat, lon){
-    return `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,ozone,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide&timezone=Asia%2FJakarta`;
-  }
-  function weatherUrlFor(lat, lon){
-    return `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=uv_index,temperature_2m,relative_humidity_2m&timezone=Asia%2FJakarta`;
-  }
-  // primary point only: adds hourly arrays for the trend chart
-  function aqiUrlPrimary(lat, lon){
-    return `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,ozone,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide&hourly=us_aqi&timezone=Asia%2FJakarta&forecast_days=1`;
-  }
-  function weatherUrlPrimary(lat, lon){
-    return `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=uv_index,temperature_2m,relative_humidity_2m&hourly=uv_index&timezone=Asia%2FJakarta&forecast_days=1`;
-  }
+  // ================= konfigurasi =================
+  const API_AQ = 'https://air-quality-api.open-meteo.com/v1/air-quality';
+  const API_FC = 'https://api.open-meteo.com/v1/forecast';
+  const AQ_CURRENT = 'us_aqi,pm2_5,pm10,ozone,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide';
+  const FC_CURRENT = 'uv_index,temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,is_day';
+  const TZ = 'Asia/Jakarta';
+  const REFRESH_MS = 10 * 60 * 1000;
+  const CACHE_KEY = 'semok.cache.v1';
+  const THEME_KEY = 'semok.theme';
 
-  async function fetchPoint(lat, lon){
-    const [aqiRes, weatherRes] = await Promise.all([
-      fetch(aqiUrlFor(lat, lon)),
-      fetch(weatherUrlFor(lat, lon))
-    ]);
-    if (!aqiRes.ok || !weatherRes.ok) throw new Error('API returned an error status');
-    const aqiData = await aqiRes.json();
-    const weatherData = await weatherRes.json();
-    return {
-      uv: weatherData.current.uv_index,
-      aqi: aqiData.current.us_aqi,
-      pollutants: aqiData.current
-    };
-  }
-
-  async function fetchPrimaryPoint(lat, lon){
-    const [aqiRes, weatherRes] = await Promise.all([
-      fetch(aqiUrlPrimary(lat, lon)),
-      fetch(weatherUrlPrimary(lat, lon))
-    ]);
-    if (!aqiRes.ok || !weatherRes.ok) throw new Error('API returned an error status');
-    const aqiData = await aqiRes.json();
-    const weatherData = await weatherRes.json();
-    return {
-      uv: weatherData.current.uv_index,
-      aqi: aqiData.current.us_aqi,
-      pollutants: aqiData.current,
-      hourlyTimes: weatherData.hourly.time,
-      hourlyUv: weatherData.hourly.uv_index,
-      hourlyAqi: aqiData.hourly.us_aqi
-    };
-  }
-
-  // other popular points across Semarang, shown on the map for context
-  // BINUS / Semarang Barat jadi fokus utama, ditaruh pertama dan ditandai isYou
-  const REFERENCE_POINTS = [
-    { name: 'BINUS @Semarang', desc: 'Semarang Barat, lokasi utama', lat: -6.9804, lon: 110.3831, isYou: true },
-    { name: 'Sam Poo Kong', desc: 'Klenteng, dekat Semarang Barat', lat: -6.9963, lon: 110.3980 },
-    { name: 'Lawang Sewu', desc: 'Bangunan bersejarah, pusat kota', lat: -6.9839, lon: 110.4106 },
-    { name: 'Simpang Lima', desc: 'Alun-alun pusat kota', lat: -6.9898, lon: 110.4229 },
-    { name: 'Kota Lama (Blenduk)', desc: 'Kawasan Kota Lama', lat: -6.9681, lon: 110.4275 },
-    { name: 'Marina Beach', desc: 'Pantai utara Semarang', lat: -6.9420, lon: 110.3980 }
+  // Titik utama: BINUS @Semarang, koordinat terdekat untuk POJ Avenue Kav. 3,
+  // Kel. Tawangsari, Kec. Semarang Barat, Kota Semarang.
+  const POINTS = [
+    { name:'BINUS @Semarang', desc:'Tawangsari, Semarang Barat', lat:-6.9804, lon:110.3831, isYou:true },
+    { name:'Sam Poo Kong',      desc:'Klenteng, dekat Semarang Barat', lat:-6.9963, lon:110.3980 },
+    { name:'Lawang Sewu',       desc:'Bangunan bersejarah, pusat kota', lat:-6.9839, lon:110.4106 },
+    { name:'Simpang Lima',      desc:'Alun-alun pusat kota', lat:-6.9898, lon:110.4229 },
+    { name:'Kota Lama (Blenduk)', desc:'Kawasan Kota Lama', lat:-6.9681, lon:110.4275 },
+    { name:'Marina Beach',      desc:'Pantai utara Semarang', lat:-6.9420, lon:110.3980 }
   ];
 
-  let map, markers = {};
+  // Pedoman WHO 2021 untuk rerata 24 jam (µg/m³). CO tidak punya pedoman 24 jam.
+  const WHO_24H = { pm2_5:15, pm10:45, ozone:100, nitrogen_dioxide:25, sulphur_dioxide:40 };
 
-  function pinIcon(kind, level){
-    const levelClass = level ? ` level-${level}` : '';
-    return L.divIcon({
-      className: '',
-      html: `<div class="marker-pin ${kind}${levelClass}"><div class="marker-pin-dot"></div></div>`,
-      iconSize: [26, 26],
-      iconAnchor: [13, 26],
-      popupAnchor: [0, -26]
-    });
+  const WMO = [
+    [0,'Cerah'], [1,'Cerah berawan'], [2,'Berawan Sebagian'], [3,'Berawan'],
+    [45,'Kabut'], [48,'Kabut beku'],
+    [51,'Gerimis ringan'], [53,'Gerimis'], [55,'Gerimis lebat'],
+    [56,'Gerimis beku'], [57,'Gerimis beku lebat'],
+    [61,'Hujan ringan'], [63,'Hujan'], [65,'Hujan lebat'],
+    [66,'Hujan beku'], [67,'Hujan beku lebat'],
+    [71,'Salju ringan'], [73,'Salju'], [75,'Salju lebat'], [77,'Butiran salju'],
+    [80,'Hujan lokal'], [81,'Hujan lokal'], [82,'Hujan lokal lebat'],
+    [85,'Salju lokal'], [86,'Salju lokal lebat'],
+    [95,'Hujan petir'], [96,'Badai + es'], [99,'Badai + es lebat']
+  ];
+
+  // ================= util =================
+  const $ = id => document.getElementById(id);
+  const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+  const pad2 = n => String(n).padStart(2,'0');
+  const isNum = v => typeof v === 'number' && Number.isFinite(v);
+  const num = (v,d=0) => isNum(v) ? v.toFixed(d) : '-';
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  // waktu API adalah waktu lokal Asia/Jakarta tanpa zona waktu, jadi jangan
+  // dibiarkan Date() menafsirkannya sebagai waktu lokal browser
+  function apiTime(iso){
+    if(!iso) return null;
+    const [d, t = '00:00'] = String(iso).split('T');
+    const [h, m] = t.split(':');
+    return { date:d, hour:+h, minute:+m, hhmm: pad2(h) + ':' + pad2(m) };
+  }
+  function clockJakarta(date){
+    return new Intl.DateTimeFormat('en-GB', { hour:'2-digit', minute:'2-digit', timeZone:TZ }).format(date || new Date());
+  }
+  function wmoLabel(code){
+    for(const [c,label] of WMO){ if(code === c) return label; }
+    return '-';
+  }
+  function pct(value, max){ return clamp((value / max) * 100, 0, 100); }
+
+  // ================= pita bahaya =================
+  const RANK = { safe:0, caution:1, danger:2, severe:3 };
+  function uvBand(uv){
+    if(uv < 3) return { level:'safe', label:'Rendah' };
+    if(uv < 6) return { level:'caution', label:'Sedang' };
+    if(uv < 8) return { level:'danger', label:'Tinggi' };
+    if(uv < 11) return { level:'danger', label:'Sangat tinggi' };
+    return { level:'severe', label:'Ekstrem' };
+  }
+  function aqiBand(aqi){
+    if(aqi <= 50) return { level:'safe', label:'Baik' };
+    if(aqi <= 100) return { level:'caution', label:'Sedang' };
+    if(aqi <= 150) return { level:'danger', label:'Tidak sehat (kelompok sensitif)' };
+    if(aqi <= 200) return { level:'danger', label:'Tidak sehat' };
+    if(aqi <= 300) return { level:'severe', label:'Sangat tidak sehat' };
+    return { level:'severe', label:'Berbahaya' };
+  }
+  function combineLevel(uv, aqi){
+    const u = uvBand(uv).level, a = aqiBand(aqi).level;
+    return RANK[u] >= RANK[a] ? u : a;
+  }
+  function overallVerdict(uv, uvB, aqi, aqiB){
+    const drivenByUv = RANK[uvB.level] >= RANK[aqiB.level];
+    const level = drivenByUv ? uvB.level : aqiB.level;
+    const copy = {
+      safe: { title:'Aman di luar', detail:'UV dan kualitas udara masih normal. Aktivitas luar ruangan aman, tidak perlu perlindungan khusus.' },
+      caution: {
+        title:'Di luar boleh, tapi santai saja',
+        detail: drivenByUv
+          ? `Mataharinya lumayan terik (UV ${uv.toFixed(1)}). Masih aman untuk kegiatan biasa, tapi pakai sunscreen kalau lebih dari 30 menit di luar.`
+          : `Kualitas udara sedikit menurun (AQI ${Math.round(aqi)}). Kebanyakan orang masih aman, tapi yang punya asma atau sakit jantung sebaiknya kurangi aktivitas berat.`
+      },
+      danger: {
+        title:'Batasi waktu di luar',
+        detail: drivenByUv
+          ? `UV sedang tinggi (${uv.toFixed(1)}). Kulit tanpa pelindung bisa terbakar dalam waktu kurang dari satu jam. Cari tempat teduh saat siang dan pakai baju tertutup.`
+          : `Kualitas udara masuk kategori tidak sehat (AQI ${Math.round(aqi)}). Kurangi aktivitas berat di luar, apalagi kalau punya masalah paru-paru atau jantung.`
+      },
+      severe: {
+        title:'Hindari keluar rumah',
+        detail: drivenByUv
+          ? `UV sedang ekstrem (${uv.toFixed(1)}). Kulit bisa terbakar dalam hitungan menit kena matahari langsung jam 10 pagi sampai 4 sore. Tetap di dalam ruangan atau cari tempat teduh penuh.`
+          : `Kualitas udara sangat buruk (AQI ${Math.round(aqi)}). Sebaiknya tidak beraktivitas berat di luar dulu. Tutup jendela kalau bisa.`
+      }
+    };
+    return { level, drivenByUv, ...copy[level] };
+  }
+  function adviceFor(uvLevel, aqiLevel){
+    const uv = [];
+    if(uvLevel === 'safe') uv.push('Tidak perlu pelindung matahari untuk keluar sebentar.');
+    if(uvLevel === 'caution') uv.push('Sunscreen (SPF 30+) lumayan membantu kalau lama di luar.');
+    if(uvLevel === 'danger') uv.push('Pakai topi, kacamata hitam, dan sunscreen SPF 30+. Hindari jalur terbuka saat siang bolong.');
+    if(uvLevel === 'severe') uv.push('Kurangi kena matahari langsung jam 10 pagi sampai 4 sore. Cari tempat teduh atau di dalam ruangan saja.');
+    const air = [];
+    if(aqiLevel === 'safe') air.push('Udara cukup bersih untuk olahraga atau aktivitas luar ruangan.');
+    if(aqiLevel === 'caution') air.push('Yang punya asma atau alergi mungkin sedikit terganggu di luar.');
+    if(aqiLevel === 'danger') air.push('Kurangi olahraga di luar. Pakai masker kalau lama di luar.');
+    if(aqiLevel === 'severe') air.push('Hindari aktivitas berat di luar. Pakai masker yang pas kalau terpaksa keluar.');
+    air.push('Kualitas udara diestimasi dari model satelit, bukan sensor tepat di titik ini, jadi angka di tiap area bisa berbeda.');
+    return { uv, air };
   }
 
+  // ================= data =================
+  function buildUrls(lat, lon, full){
+    const q = 'latitude=' + lat + '&longitude=' + lon + '&timezone=' + encodeURIComponent(TZ);
+    const aq = API_AQ + '?' + q + '&current=' + AQ_CURRENT + (full ? '&hourly=us_aqi&forecast_days=2' : '');
+    const fc = API_FC + '?' + q + '&current=' + FC_CURRENT + (full ? '&daily=sunrise,sunset,uv_index_max&hourly=uv_index,precipitation_probability&forecast_days=2' : '');
+    return { aq, fc };
+  }
+  async function fetchJson(url, timeout){
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeout || 12000);
+    try{
+      const res = await fetch(url, { signal: ctrl.signal });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      return await res.json();
+    } finally { clearTimeout(timer); }
+  }
+  async function fetchPoint(lat, lon, full){
+    const urls = buildUrls(lat, lon, full);
+    const [aq, fc] = await Promise.all([ fetchJson(urls.aq), fetchJson(urls.fc) ]);
+    const uv = isNum(fc.current && fc.current.uv_index) ? fc.current.uv_index : 0;
+    const aqi = isNum(aq.current && aq.current.us_aqi) ? aq.current.us_aqi : 0;
+    return { aq, fc, uv, aqi, level: combineLevel(uv, aqi) };
+  }
+
+  // ================= state =================
+  const state = {
+    primary: null,          // { aq, fc, uv, aqi, level }
+    refs: {},               // nama -> { uv, aqi, level }
+    me: null,               // { lat, lon, uv, aqi, level }
+    lastOk: 0,
+    nextAt: 0,
+    stale: false
+  };
+  let map, markers = {}, meMarker = null;
+
+  // ================= cache =================
+  function saveCache(){
+    try{
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        savedAt: Date.now(), primary: state.primary, refs: state.refs, me: state.me
+      }));
+    }catch(e){/* storage penuh atau diblokir, abaikan */ }
+  }
+  function readCache(){
+    try{ return JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); }catch(e){ return null; }
+  }
+
+  // ================= peta =================
+  function pinIcon(kind, level){
+    const cls = level ? ' level-' + level : '';
+    return L.divIcon({
+      className:'',
+      html:'<div class="marker-pin ' + kind + cls + '"><div class="marker-pin-dot"></div></div>',
+      iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-26]
+    });
+  }
+  function meIcon(){
+    return L.divIcon({ className:'', html:'<div class="marker-me"></div>', iconSize:[22,22], iconAnchor:[11,11] });
+  }
+  function ensureMeMarker(){
+    if(!state.me || !map) return;
+    if(meMarker) meMarker.setLatLng([state.me.lat, state.me.lon]);
+    else meMarker = L.marker([state.me.lat, state.me.lon], { icon: meIcon() }).addTo(map);
+  }
+  function popupHtml(point, reading){
+    let body;
+    if(reading){
+      body = '<span class="popup-reading">UV <b>' + reading.uv.toFixed(1) + '</b> &middot; AQI <b>' + Math.round(reading.aqi) + '</b></span>';
+    } else {
+      body = '<span class="popup-reading">' + (point.isYou ? 'Data di bawah' : 'Sedang memuat data...') + '</span>';
+    }
+    return '<span class="popup-name">' + esc(point.name) + '</span><span class="popup-desc">' + esc(point.desc) + '</span>' + body;
+  }
   function initMap(){
-    map = L.map('map', {
-      scrollWheelZoom: false,
-      zoomControl: true
-    }).setView([-6.9830, 110.4020], 12);
-
+    map = L.map('map', { scrollWheelZoom:false, zoomControl:true })
+      .setView([-6.9830, 110.4020], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
+      maxZoom:18,
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
     }).addTo(map);
-
-    // enable scroll zoom only once the user interacts, so page scroll isn't hijacked
+    // scroll zoom hanya aktif setelah pengguna berinteraksi, supaya scroll halaman tidak dibajak
     map.on('click', () => map.scrollWheelZoom.enable());
-
-    REFERENCE_POINTS.forEach(point => {
-      const icon = pinIcon(point.isYou ? 'you' : 'ref');
-      const marker = L.marker([point.lat, point.lon], { icon }).addTo(map);
-      marker.bindPopup(buildPopup(point, null));
+    POINTS.forEach(point => {
+      const marker = L.marker([point.lat, point.lon], { icon: pinIcon(point.isYou ? 'you' : 'ref') }).addTo(map);
+      marker.bindPopup(popupHtml(point, null));
       markers[point.name] = { marker, point };
     });
   }
-
-  function buildPopup(point, reading){
-    const readingHtml = reading
-      ? `<span class="popup-reading">UV <b>${reading.uv.toFixed(1)}</b> · AQI <b>${Math.round(reading.aqi)}</b></span>`
-      : `<span class="popup-reading">${point.isYou ? 'Data di bawah' : 'Sedang memuat data...'}</span>`;
-    return `<span class="popup-name">${point.name}</span>${point.desc}<br>${readingHtml}`;
+  function focusPoint(name){
+    const entry = markers[name];
+    if(!entry) return;
+    map.flyTo([entry.point.lat, entry.point.lon], 14, { duration:0.8 });
+    entry.marker.openPopup();
   }
 
-  function uvBand(uv){
-    if (uv < 3) return {level:'safe', label:'Rendah'};
-    if (uv < 6) return {level:'caution', label:'Sedang'};
-    if (uv < 8) return {level:'danger', label:'Tinggi'};
-    if (uv < 11) return {level:'danger', label:'Sangat tinggi'};
-    return {level:'severe', label:'Ekstrem'};
+  // ================= render: verdict & gauge =================
+  function renderVerdict(p){
+    const uvB = uvBand(p.uv), aqiB = aqiBand(p.aqi);
+    const v = overallVerdict(p.uv, uvB, p.aqi, aqiB);
+    const band = $('verdictBand');
+    band.className = 'verdict ' + v.level;
+    $('verdictTitle').textContent = v.title;
+    $('verdictDetail').textContent = v.detail;
+    $('verdictEyebrow').textContent = 'Saat ini · Semarang Barat · ' + p.nowLabel + ' WIB';
+    $('verdictChips').innerHTML =
+      '<span class="chip">Indeks UV <b>' + p.uv.toFixed(1) + '</b></span>' +
+      '<span class="chip">AQI <b>' + Math.round(p.aqi) + '</b></span>' +
+      '<span class="chip is-accent">Yang lebih parah: ' + (v.drivenByUv ? 'UV' : 'kualitas udara') + '</span>';
+    return { uvB, aqiB, verdict: v };
+  }
+  function renderGauges(p, bands, day){
+    const uvPct = pct(p.uv, 12);
+    const aqiPct = pct(p.aqi, 300);
+    $('uvGauge').className = 'gauge ' + bands.uvB.level;
+    $('uvValue').textContent = p.uv.toFixed(1);
+    $('uvBandLabel').textContent = bands.uvB.label;
+    $('uvMeter').style.width = uvPct + '%';
+    $('aqiGauge').className = 'gauge ' + bands.aqiB.level;
+    $('aqiValue').textContent = Math.round(p.aqi);
+    $('aqiBandLabel').textContent = bands.aqiB.label;
+    $('aqiMeter').style.width = aqiPct + '%';
+
+    const peak = day.reduce((best, h) => (h.uv > (best ? best.uv : -1) ? h : best), null);
+    $('uvNote').textContent = peak
+      ? 'Puncak hari ini ' + peak.hhmm + ' (UV ' + peak.uv.toFixed(1) + ').'
+      : '-';
+    const worst = day.reduce((best, h) => (h.aqi > (best ? best.aqi : -1) ? h : best), null);
+    $('aqiNote').textContent = worst
+      ? 'Terburuk hari ini ' + worst.hhmm + ' (AQI ' + Math.round(worst.aqi) + ').'
+      : '-';
   }
 
-  function aqiBand(aqi){
-    if (aqi <= 50) return {level:'safe', label:'Baik'};
-    if (aqi <= 100) return {level:'caution', label:'Sedang'};
-    if (aqi <= 150) return {level:'danger', label:'Tidak sehat (kelompok sensitif)'};
-    if (aqi <= 200) return {level:'danger', label:'Tidak sehat'};
-    if (aqi <= 300) return {level:'severe', label:'Sangat tidak sehat'};
-    return {level:'severe', label:'Berbahaya'};
+  // ================= render: stat strip =================
+  function renderStats(p){
+    const c = p.fc.current || {};
+    const items = [
+      { k:'Suhu', v: isNum(c.temperature_2m) ? Math.round(c.temperature_2m) + '°' : '-', n: isNum(c.apparent_temperature) ? 'terasa ' + Math.round(c.apparent_temperature) + '°' : '' },
+      { k:'Kelembapan', v: isNum(c.relative_humidity_2m) ? c.relative_humidity_2m + '%' : '-', n:'' },
+      { k:'Cuaca', v: wmoLabel(c.weather_code), n: isNum(c.precipitation) ? 'hujan ' + c.precipitation + ' mm' : '' },
+      { k:'Matahari terbit', v: p.sunriseLabel, n: 'WIB' },
+      { k:'Matahari terbenam', v: p.sunsetLabel, n:'' },
+      { k:'UV maks', v: isNum(p.uvMax) ? p.uvMax.toFixed(1) : '-', n:'hari ini' },
+      { k:'AQI maks', v: isNum(p.aqiMax) ? String(Math.round(p.aqiMax)) : '-', n:'hari ini' },
+      { k:'Peluang hujan', v: p.rainNow, n:'jam ini' }
+    ];
+    $('stats').innerHTML = items.map(i =>
+      '<div class="stat"><span class="stat-k">' + esc(i.k) + '</span><span class="stat-v">' + esc(i.v) + '</span>' +
+      (i.n ? '<span class="stat-n">' + esc(i.n) + '</span>' : '') + '</div>'
+    ).join('');
   }
 
-  // gabungkan dua indikator jadi satu kesimpulan, yang lebih parah menang
-  const RANK = {safe:0, caution:1, danger:2, severe:3};
-
-  function overallVerdict(uv, uvB, aqi, aqiB){
-    const worse = RANK[uvB.level] >= RANK[aqiB.level] ? uvB : aqiB;
-    const drivenByUv = RANK[uvB.level] >= RANK[aqiB.level];
-
-    const copy = {
-      safe: {
-        title: 'Aman di luar',
-        detail: `UV dan kualitas udara masih normal. Aktivitas luar ruangan aman, tidak perlu perlindungan khusus.`
-      },
-      caution: {
-        title: 'Di luar boleh, tapi santai saja',
-        detail: drivenByUv
-          ? `Mataharinya lumayan terik (UV ${uv.toFixed(1)}). Masih aman untuk kegiatan biasa, tapi pakai sunscreen kalau lebih dari 30 menit di luar.`
-          : `Kualitas udara sedikit menurun (AQI ${aqi}). Kebanyakan orang masih aman, tapi yang punya asma atau sakit jantung sebaiknya kurangi aktivitas berat.`
-      },
-      danger: {
-        title: 'Batasi waktu di luar',
-        detail: drivenByUv
-          ? `UV sedang tinggi (${uv.toFixed(1)}). Kulit tanpa pelindung bisa terbakar dalam waktu kurang dari satu jam. Cari tempat teduh saat siang dan pakai baju tertutup.`
-          : `Kualitas udara masuk kategori tidak sehat (AQI ${aqi}). Kurangi aktivitas berat di luar, apalagi kalau punya masalah paru-paru atau jantung.`
-      },
-      severe: {
-        title: 'Hindari keluar rumah',
-        detail: drivenByUv
-          ? `UV sedang ekstrem (${uv.toFixed(1)}). Kulit bisa terbakar dalam hitungan menit kalau kena matahari langsung jam 10 pagi sampai 4 sore. Tetap di dalam ruangan atau cari tempat teduh penuh.`
-          : `Kualitas udara sangat buruk (AQI ${aqi}). Sebaiknya tidak beraktivitas di luar dulu. Tutup jendela kalau bisa.`
+  // ================= render: polutan =================
+  function renderPollutants(pollutants){
+    const defs = [
+      { key:'pm2_5', label:'PM2.5' },
+      { key:'pm10', label:'PM10' },
+      { key:'ozone', label:'Ozon' },
+      { key:'nitrogen_dioxide', label:'NO₂' },
+      { key:'sulphur_dioxide', label:'SO₂' },
+      { key:'carbon_monoxide', label:'CO' }
+    ];
+    $('pollGrid').innerHTML = defs.map(d => {
+      const v = pollutants ? pollutants[d.key] : null;
+      const ref = WHO_24H[d.key];
+      let note, ratio = 0, level = 'safe';
+      if(!isNum(v)){
+        note = 'tidak tersedia';
+      } else if(ref){
+        ratio = clamp(v / ref, 0, 1);
+        if(v <= ref / 4){ level = 'safe'; note = 'jauh di bawah pedoman'; }
+        else if(v <= ref){ level = 'caution'; note = 'di bawah pedoman'; }
+        else if(v <= ref * 2){ level = 'danger'; note = 'di atas pedoman'; }
+        else { level = 'severe'; note = 'jauh di atas pedoman'; }
+      } else {
+        note = 'tanpa pedoman 24 jam';
+        level = 'caution';
       }
+      return '<div class="poll ' + level + '">' +
+        '<div class="poll-top"><span class="poll-name">' + d.label + '</span>' +
+        '<span class="poll-value">' + num(v, isNum(v) && v < 100 ? 1 : 0) + '</span></div>' +
+        '<div class="poll-bar"><i style="width:' + (ratio * 100) + '%"></i></div>' +
+        '<span class="poll-note">' + esc(note) + '</span></div>';
+    }).join('');
+  }
+
+  // ================= render: daftar titik =================
+  function renderPointList(){
+    const rows = [];
+    POINTS.forEach(p => {
+      const reading = state.refs[p.name] || (p.isYou ? state.primary : null);
+      const uv = reading ? reading.uv : null;
+      const aqi = reading ? reading.aqi : null;
+      const level = reading ? reading.level : '';
+      rows.push(
+        '<button class="point ' + level + (p.isYou ? ' is-primary' : '') + '" type="button" data-point="' + esc(p.name) + '">' +
+          '<span class="point-bar"></span>' +
+          '<span class="point-info"><span class="point-name">' + esc(p.name) + (p.isYou ? ' · utama' : '') + '</span>' +
+          '<span class="point-desc">' + esc(p.desc) + '</span></span>' +
+          '<span class="point-vals">' +
+            '<span><b>' + (isNum(uv) ? uv.toFixed(1) : '·') + '</b><i>UV</i></span>' +
+            '<span><b>' + (isNum(aqi) ? Math.round(aqi) : '·') + '</b><i>AQI</i></span>' +
+          '</span></button>'
+      );
+    });
+    if(state.me){
+      rows.push(
+        '<button class="point ' + state.me.level + '" type="button" data-point="__me">' +
+          '<span class="point-bar"></span>' +
+          '<span class="point-info"><span class="point-name">Lokasi saya</span>' +
+          '<span class="point-desc">GPS perangkat ini</span></span>' +
+          '<span class="point-vals">' +
+            '<span><b>' + state.me.uv.toFixed(1) + '</b><i>UV</i></span>' +
+            '<span><b>' + Math.round(state.me.aqi) + '</b><i>AQI</i></span>' +
+          '</span></button>'
+      );
+    }
+    $('pointList').innerHTML = rows.join('');
+    $('pointList').querySelectorAll('.point').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.dataset.point;
+        if(name === '__me'){
+          if(state.me && meMarker) map.flyTo([state.me.lat, state.me.lon], 14, { duration:0.8 });
+        } else {
+          focusPoint(name);
+        }
+      });
+    });
+  }
+
+  // ================= render: grafik =================
+  function renderChart(day, nowIdx, win, sunriseHour, sunsetHour){
+    const wrap = $('chartWrap');
+    if(!day.length){ wrap.innerHTML = '<p style="font-size:13px;color:var(--ink-soft)">Data grafik belum tersedia.</p>'; return; }
+
+    const W = 640, H = 262;
+    const padL = 34, padR = 38, padT = 30, padB = 44;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const n = day.length;
+    const uvMax = 12;
+    const aqiMax = Math.max(200, Math.max.apply(null, day.map(d => d.aqi)) * 1.15);
+
+    const xFor = i => padL + (plotW * (n === 1 ? 0.5 : i / (n - 1)));
+    const yUv = v => padT + plotH - (plotH * clamp(v, 0, uvMax) / uvMax);
+    const yAqi = v => padT + plotH - (plotH * clamp(v, 0, aqiMax) / aqiMax);
+
+    const path = (vals, yFn, from, to) => {
+      let s = '';
+      for(let i = from; i <= to; i++){ s += (i === from ? 'M ' : ' L ') + xFor(i).toFixed(1) + ',' + yFn(vals[i]).toFixed(1); }
+      return s;
     };
+    const uvVals = day.map(d => d.uv), aqiVals = day.map(d => d.aqi);
 
-    return { level: worse.level, ...copy[worse.level] };
+    // garis kisi + label sumbu
+    let grid = '';
+    for(let g = 0; g <= 4; g++){
+      const y = padT + plotH - (plotH * g / 4);
+      grid += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="var(--line-soft)" stroke-width="1"' + (g === 0 ? '' : ' stroke-dasharray="2,4"') + '/>';
+      grid += '<text x="' + (padL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" class="axis-label" text-anchor="end">' + (uvMax * g / 4).toFixed(0) + '</text>';
+      grid += '<text x="' + (W - padR + 6) + '" y="' + (y + 3.5).toFixed(1) + '" class="axis-label">' + (Math.round(aqiMax * g / 4 / 5) * 5) + '</text>';
+    }
+    grid += '<text x="' + (padL - 6) + '" y="' + (padT - 16) + '" class="axis-title" text-anchor="end" fill="var(--sun)">UV</text>';
+    grid += '<text x="' + (W - padR + 6) + '" y="' + (padT - 16) + '" class="axis-title" fill="var(--nila)">AQI</text>';
+
+    // jendela terbaik
+    let winRect = '';
+    if(win && win.from >= 0 && win.to >= win.from && win.to < n){
+      const x1 = xFor(win.from), x2 = xFor(win.to);
+      winRect = '<rect x="' + x1.toFixed(1) + '" y="' + padT + '" width="' + Math.max(2, x2 - x1).toFixed(1) + '" height="' + plotH + '" fill="var(--safe)" opacity="0.10"/>' +
+        '<text x="' + ((x1 + x2) / 2).toFixed(1) + '" y="' + (padT - 7) + '" class="axis-label" text-anchor="middle" fill="var(--safe)">jendela terbaik</text>';
+    }
+
+    // matahari terbit / terbenam
+    let sun = '';
+    [['sunrise', sunriseHour], ['sunset', sunsetHour]].forEach(pair => {
+      const label = pair[0], hour = pair[1];
+      if(hour === null || hour === undefined) return;
+      const idx = day.findIndex(d => d.hour === hour);
+      if(idx < 0) return;
+      const x = xFor(idx);
+      sun += '<line x1="' + x.toFixed(1) + '" y1="' + padT + '" x2="' + x.toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="var(--emas)" stroke-width="1" stroke-dasharray="2,3" opacity="0.8"/>' +
+        '<text x="' + x.toFixed(1) + '" y="' + (H - 6) + '" class="axis-label" text-anchor="middle" fill="var(--emas)">' + (label === 'sunrise' ? 'terbit' : 'terbenam') + '</text>';
+    });
+
+    // label jam, lebih jarang di layar sempit supaya tidak berdesakan
+    const step = (wrap.clientWidth || 640) < 460 ? 6 : 3;
+    let labels = '';
+    for(let h = 0; h < n; h += step){
+      labels += '<text x="' + xFor(h).toFixed(1) + '" y="' + (H - 26) + '" class="axis-label" text-anchor="middle">' + day[h].hhmm + '</text>';
+    }
+
+    const nowX = xFor(nowIdx);
+    const nowLine = '<line x1="' + nowX.toFixed(1) + '" y1="' + padT + '" x2="' + nowX.toFixed(1) + '" y2="' + (padT + plotH) + '" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>' +
+      '<text x="' + nowX.toFixed(1) + '" y="' + (padT - 7) + '" class="now-label" text-anchor="middle">sekarang</text>';
+
+    const svg =
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" id="trendSvg">' +
+        grid + winRect + sun +
+        '<path d="' + path(aqiVals, yAqi, 0, nowIdx) + '" fill="none" stroke="var(--nila)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>' +
+        '<path d="' + path(aqiVals, yAqi, nowIdx, n - 1) + '" fill="none" stroke="var(--nila)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5,4" opacity="0.55"/>' +
+        '<path d="' + path(uvVals, yUv, 0, nowIdx) + '" fill="none" stroke="var(--sun)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>' +
+        '<path d="' + path(uvVals, yUv, nowIdx, n - 1) + '" fill="none" stroke="var(--sun)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5,4" opacity="0.55"/>' +
+        nowLine +
+        '<circle cx="' + nowX.toFixed(1) + '" cy="' + yAqi(aqiVals[nowIdx]).toFixed(1) + '" r="3.5" fill="var(--nila)"/>' +
+        '<circle cx="' + nowX.toFixed(1) + '" cy="' + yUv(uvVals[nowIdx]).toFixed(1) + '" r="3.5" fill="var(--sun)"/>' +
+        '<line id="hoverLine" x1="0" y1="' + padT + '" x2="0" y2="' + (padT + plotH) + '" stroke="var(--ink-soft)" stroke-width="1" opacity="0"/>' +
+        '<circle id="hoverUv" r="3" fill="var(--sun)" opacity="0"/>' +
+        '<circle id="hoverAqi" r="3" fill="var(--nila)" opacity="0"/>' +
+        labels +
+      '</svg>';
+    wrap.innerHTML = svg;
+
+    // tooltip
+    const svgEl = document.getElementById('trendSvg');
+    const tip = $('chartTip');
+    const hoverLine = document.getElementById('hoverLine');
+    const hoverUv = document.getElementById('hoverUv');
+    const hoverAqi = document.getElementById('hoverAqi');
+    function move(ev){
+      const rect = svgEl.getBoundingClientRect();
+      const vx = (ev.clientX - rect.left) / rect.width * W;
+      let idx = Math.round((vx - padL) / plotW * (n - 1));
+      idx = clamp(idx, 0, n - 1);
+      const d = day[idx];
+      const x = xFor(idx);
+      hoverLine.setAttribute('x1', x); hoverLine.setAttribute('x2', x); hoverLine.setAttribute('opacity', '0.35');
+      hoverUv.setAttribute('cx', x); hoverUv.setAttribute('cy', yUv(d.uv)); hoverUv.setAttribute('opacity', '1');
+      hoverAqi.setAttribute('cx', x); hoverAqi.setAttribute('cy', yAqi(d.aqi)); hoverAqi.setAttribute('opacity', '1');
+      tip.innerHTML = '<b>' + d.hhmm + '</b>' +
+        '<span class="tip-row">Indeks UV <b>' + d.uv.toFixed(1) + '</b></span>' +
+        '<span class="tip-row">AQI <b>' + Math.round(d.aqi) + '</b></span>' +
+        (d.pop > 0 ? '<span class="tip-row">Hujan <b>' + d.pop + '%</b></span>' : '');
+      tip.classList.remove('hidden');
+      const px = (x / W) * rect.width;
+      tip.style.left = clamp(px, 52, rect.width - 52) + 'px';
+      tip.style.top = Math.min(yUv(d.uv), yAqi(d.aqi)) * (rect.height / H) + 'px';
+    }
+    function leave(){
+      tip.classList.add('hidden');
+      hoverLine.setAttribute('opacity', '0');
+      hoverUv.setAttribute('opacity', '0');
+      hoverAqi.setAttribute('opacity', '0');
+    }
+    svgEl.addEventListener('pointermove', move);
+    svgEl.addEventListener('pointerdown', move);
+    svgEl.addEventListener('pointerleave', leave);
   }
 
-  function adviceFor(level, uvLevel, aqiLevel){
-    const items = [];
-    if (uvLevel === 'safe') items.push('Tidak perlu pelindung matahari untuk keluar sebentar.');
-    if (uvLevel === 'caution') items.push('Sunscreen (SPF 30+) lumayan membantu kalau lama di luar.');
-    if (uvLevel === 'danger') items.push('Pakai topi, kacamata hitam, dan sunscreen SPF 30+. Lewat jalur yang teduh kalau pindah kelas.');
-    if (uvLevel === 'severe') items.push('Kurangi kena matahari langsung jam 10 pagi sampai 4 sore. Cari tempat teduh atau di dalam ruangan saja.');
-
-    if (aqiLevel === 'safe') items.push('Udara cukup bersih untuk olahraga atau aktivitas luar ruangan.');
-    if (aqiLevel === 'caution') items.push('Yang punya asma atau alergi mungkin sedikit terganggu di luar.');
-    if (aqiLevel === 'danger') items.push('Kurangi olahraga di luar. Pakai masker kalau lama di luar.');
-    if (aqiLevel === 'severe') items.push('Hindari aktivitas berat di luar. Pakai masker yang pas kalau terpaksa keluar.');
-
-    items.push('Data ini update dari sensor langsung, kondisi bisa berubah sepanjang hari.');
-    return items;
+  // ================= render: strip jam =================
+  function renderHourStrip(future){
+    const wrap = $('hourStrip');
+    if(!future.length){ wrap.innerHTML = '<p style="font-size:13px;color:var(--ink-soft)">Data per jam belum tersedia.</p>'; return; }
+    wrap.innerHTML = future.map((h, i) =>
+      '<div class="hour ' + h.level + (i === 0 ? ' is-now' : '') + '">' +
+        '<span class="hour-t">' + h.hhmm + (i === 0 ? ' · kini' : '') + '</span>' +
+        '<span class="hour-v">' + h.uv.toFixed(1) + '<i>UV</i></span>' +
+        '<span class="hour-v">' + Math.round(h.aqi) + '<i>AQI</i></span>' +
+        '<span class="hour-rain">' + (h.pop > 0 ? h.pop + '% hujan' : '—') + '</span>' +
+      '</div>'
+    ).join('');
   }
 
-  function pct(value, max){
-    return Math.max(0, Math.min(100, (value / max) * 100));
-  }
+  // ================= render: jendela terbaik =================
+  function findBestWindow(future, sunriseHour, sunsetHour){
+    if(!future.length) return null;
+    const scored = future.map((h, i) => ({
+      h, i,
+      score: h.uv + h.aqi / 50,
+      level: h.level
+    }));
+    const daylight = scored.filter(s => s.h.hour >= sunriseHour && s.h.hour <= sunsetHour);
+    const pool = (daylight.length ? daylight : scored).filter(s => RANK[s.level] <= RANK.caution);
+    if(!pool.length) return null;
 
-  function setGauge(gaugeEl, meterEl, bandLabelEl, band, percent){
-    gaugeEl.className = 'gauge ' + band.level;
-    meterEl.style.width = percent + '%';
-    bandLabelEl.textContent = band.label;
-  }
+    // kelompokkan jadi rentang berurutan
+    const runs = [];
+    let cur = [pool[0]];
+    for(let i = 1; i < pool.length; i++){
+      if(pool[i].i === pool[i-1].i + 1) cur.push(pool[i]);
+      else { runs.push(cur); cur = [pool[i]]; }
+    }
+    runs.push(cur);
 
-  function renderTrendChart(times, uvVals, aqiVals){
-    const wrap = document.getElementById('chartWrap');
-    if (!times || !uvVals || !aqiVals || times.length === 0) {
-      wrap.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">Data grafik belum tersedia.</p>';
+    let best = null;
+    runs.forEach(run => {
+      const mean = run.reduce((s, r) => s + r.score, 0) / run.length;
+      if(!best || mean < best.mean) best = { run, mean };
+    });
+    const from = best.run[0], to = best.run[best.run.length - 1];
+    const worstLevel = best.run.reduce((w, r) => RANK[r.level] > RANK[w] ? r.level : w, 'safe');
+    return { from: from.i, to: to.i, start: from.h, end: to.h, level: worstLevel, daylight: !!daylight.length };
+  }
+  function renderBest(win, today){
+    const card = $('bestCard');
+    if(!win){
+      card.classList.add('is-none');
+      card.style.setProperty('--accent', 'var(--danger)');
+      $('bestTime').textContent = 'Tidak ada';
+      $('bestText').textContent = 'Sepanjang 24 jam ke depan tidak ada jendela dengan UV dan udara yang sama-sama aman. Kalau harus keluar, pilih waktu terdingin dan pakai perlindungan lengkap.';
       return;
     }
-
-    const width = 600, height = 190;
-    const padLeft = 8, padRight = 8, padTop = 20, padBottom = 26;
-    const plotW = width - padLeft - padRight;
-    const plotH = height - padTop - padBottom;
-    const n = times.length;
-
-    const xFor = i => padLeft + (plotW * i / (n - 1));
-    const yFor = (val, maxVal) => padTop + plotH - (plotH * Math.max(0, val) / maxVal);
-
-    const uvMax = 12;
-    const aqiMax = Math.max(200, Math.max(...aqiVals) * 1.15);
-
-    // find current hour index by matching against 'now'
-    const now = new Date();
-    let currentIdx = times.findIndex(t => {
-      const d = new Date(t);
-      return d.getHours() === now.getHours() && d.getDate() === now.getDate();
-    });
-    if (currentIdx === -1) currentIdx = Math.min(n - 1, Math.max(0, now.getHours()));
-
-    // build two path segments per series: observed (0..currentIdx) and forecast (currentIdx..end)
-    function pathFor(vals, maxVal, fromIdx, toIdx){
-      const slice = [];
-      for (let i = fromIdx; i <= toIdx; i++){
-        slice.push(`${xFor(i).toFixed(1)},${yFor(vals[i], maxVal).toFixed(1)}`);
-      }
-      return slice.length ? 'M ' + slice.join(' L ') : '';
-    }
-
-    const uvObservedPath = pathFor(uvVals, uvMax, 0, currentIdx);
-    const uvForecastPath = pathFor(uvVals, uvMax, currentIdx, n - 1);
-    const aqiObservedPath = pathFor(aqiVals, aqiMax, 0, currentIdx);
-    const aqiForecastPath = pathFor(aqiVals, aqiMax, currentIdx, n - 1);
-
-    const nowX = xFor(currentIdx);
-    const uvNowY = yFor(uvVals[currentIdx], uvMax);
-    const aqiNowY = yFor(aqiVals[currentIdx], aqiMax);
-
-    // hour labels at every 4th hour
-    let labels = '';
-    for (let h = 0; h < n; h += 4) {
-      const d = new Date(times[h]);
-      const label = d.getHours().toString().padStart(2, '0') + ':00';
-      labels += `<text x="${xFor(h).toFixed(1)}" y="${height - 6}" class="chart-axis-label" text-anchor="middle">${label}</text>`;
-    }
-
-    const svg = `
-      <svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-        <line x1="${nowX.toFixed(1)}" y1="${padTop}" x2="${nowX.toFixed(1)}" y2="${height - padBottom}"
-              stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3,3" opacity="0.45"/>
-        <path d="${aqiObservedPath}" fill="none" stroke="var(--indigo)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-        <path d="${aqiForecastPath}" fill="none" stroke="var(--indigo)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5,4" opacity="0.55"/>
-        <path d="${uvObservedPath}" fill="none" stroke="var(--sun)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-        <path d="${uvForecastPath}" fill="none" stroke="var(--sun)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5,4" opacity="0.55"/>
-        <circle cx="${nowX.toFixed(1)}" cy="${aqiNowY.toFixed(1)}" r="3.5" fill="var(--indigo)"/>
-        <circle cx="${nowX.toFixed(1)}" cy="${uvNowY.toFixed(1)}" r="3.5" fill="var(--sun)"/>
-        <text x="${nowX.toFixed(1)}" y="${padTop - 3}" class="chart-now-label" text-anchor="middle">sekarang</text>
-        <line x1="${padLeft}" y1="${height - padBottom}" x2="${width - padRight}" y2="${height - padBottom}" stroke="var(--line)" stroke-width="1"/>
-        ${labels}
-      </svg>
-    `;
-
-    wrap.innerHTML = svg;
+    card.classList.remove('is-none');
+    card.style.setProperty('--accent', win.level === 'safe' ? 'var(--safe)' : 'var(--caution)');
+    const besok = win.start.date !== today;
+    $('bestTime').textContent = (besok ? 'Besok ' : '') + win.start.hhmm + ' – ' + win.end.hhmm;
+    $('bestText').textContent = win.level === 'safe'
+      ? 'UV dan udara sama-sama rendah di rentang ini. Waktu paling nyaman buat keluar, jalan, atau olahraga ringan.'
+      : 'Masih bisa keluar, tapi UV atau udara belum ideal. Pakai sunscreen dan jangan kelamaan di luar.';
   }
 
-  async function loadData(){
-    document.getElementById('loadingState').classList.remove('hidden');
-    document.getElementById('errorState').classList.add('hidden');
-    document.getElementById('content').classList.add('hidden');
+  // ================= render: lokasi saya =================
+  function renderMe(){
+    const grid = $('locGrid');
+    if(!state.me){
+      grid.innerHTML = '';
+      $('locNote').textContent = 'Belum diaktifkan. Izinkan akses lokasi untuk melihat kondisi di tempat Anda sekarang.';
+      return;
+    }
+    const level = state.me.level;
+    const band = uvBand(state.me.uv).level;
+    grid.innerHTML =
+      '<div class="loc-box"><span class="loc-k">Indeks UV</span><span class="loc-v">' + state.me.uv.toFixed(1) + '</span><span class="loc-note" style="margin:2px 0 0">' + uvBand(state.me.uv).label + '</span></div>' +
+      '<div class="loc-box"><span class="loc-k">US AQI</span><span class="loc-v">' + Math.round(state.me.aqi) + '</span><span class="loc-note" style="margin:2px 0 0">' + aqiBand(state.me.aqi).label + '</span></div>' +
+      '<div class="loc-box"><span class="loc-k">Tingkat</span><span class="loc-v" style="color:var(--' + level + ')">' + level + '</span><span class="loc-note" style="margin:2px 0 0">' + state.me.lat.toFixed(3) + ', ' + state.me.lon.toFixed(3) + '</span></div>';
+    $('locNote').textContent = 'Perkiraan untuk koordinat GPS perangkat ini. Data tetap berbasis model, bukan sensor personal.';
+  }
 
-    try {
-      // primary point: BINUS / Semarang Barat
-      const binusPoint = REFERENCE_POINTS.find(p => p.isYou);
-      const primary = await fetchPrimaryPoint(binusPoint.lat, binusPoint.lon);
+  // ================= render utama =================
+  function renderPrimary(){
+    const p = state.primary;
+    if(!p) return;
+    const fc = p.fc, aq = p.aq;
+    const cur = apiTime(fc.current && fc.current.time) || { date:'', hour:0, minute:0, hhmm: clockJakarta() };
+    p.nowLabel = cur.hhmm;
 
-      const uv = primary.uv;
-      const aqi = primary.aqi;
+    // hari ini = hari dari tanggal API (WIB)
+    const times = (fc.hourly && fc.hourly.time) || [];
+    const uvVals = (fc.hourly && fc.hourly.uv_index) || [];
+    const popVals = (fc.hourly && fc.hourly.precipitation_probability) || [];
+    const aqiVals = (aq.hourly && aq.hourly.us_aqi) || [];
+    const dayStart = times.findIndex(t => { const a = apiTime(t); return a && a.date === cur.date; });
 
-      const uvB = uvBand(uv);
-      const aqiB = aqiBand(aqi);
-      const verdict = overallVerdict(uv, uvB, aqi, aqiB);
-
-      // verdict band
-      const band = document.getElementById('verdictBand');
-      band.className = 'verdict ' + verdict.level;
-      document.getElementById('verdictTitle').textContent = verdict.title;
-      document.getElementById('verdictDetail').textContent = verdict.detail;
-
-      const now = new Date();
-      document.getElementById('verdictEyebrow').textContent =
-        'Saat ini · Semarang Barat · ' + now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}) + ' WIB';
-
-      // gauges
-      document.getElementById('uvValue').textContent = uv.toFixed(1);
-      setGauge(document.getElementById('uvGauge'), document.getElementById('uvMeter'), document.getElementById('uvBandLabel'), uvB, pct(uv, 12));
-
-      document.getElementById('aqiValue').textContent = Math.round(aqi);
-      setGauge(document.getElementById('aqiGauge'), document.getElementById('aqiMeter'), document.getElementById('aqiBandLabel'), aqiB, pct(aqi, 300));
-
-      // pollutant grid
-      const c = primary.pollutants;
-      document.getElementById('pm25').textContent = c.pm2_5 != null ? c.pm2_5.toFixed(1) : '-';
-      document.getElementById('pm10').textContent = c.pm10 != null ? c.pm10.toFixed(1) : '-';
-      document.getElementById('o3').textContent = c.ozone != null ? c.ozone.toFixed(1) : '-';
-      document.getElementById('no2').textContent = c.nitrogen_dioxide != null ? c.nitrogen_dioxide.toFixed(1) : '-';
-      document.getElementById('so2').textContent = c.sulphur_dioxide != null ? c.sulphur_dioxide.toFixed(1) : '-';
-      document.getElementById('co').textContent = c.carbon_monoxide != null ? c.carbon_monoxide.toFixed(0) : '-';
-
-      // 24h trend chart
-      renderTrendChart(primary.hourlyTimes, primary.hourlyUv, primary.hourlyAqi);
-
-      // advice
-      const list = document.getElementById('adviceList');
-      list.innerHTML = '';
-      adviceFor(verdict.level, uvB.level, aqiB.level).forEach(text => {
-        const li = document.createElement('li');
-        li.textContent = text;
-        list.appendChild(li);
+    const all = [];
+    for(let i = 0; i < times.length; i++){
+      const t = apiTime(times[i]);
+      all.push({
+        time: times[i], date: t.date, hour: t.hour, hhmm: t.hhmm,
+        uv: isNum(uvVals[i]) ? uvVals[i] : 0,
+        aqi: isNum(aqiVals[i]) ? aqiVals[i] : 0,
+        pop: isNum(popVals[i]) ? popVals[i] : 0
       });
+    }
+    all.forEach(h => { h.level = combineLevel(h.uv, h.aqi); });
 
-      document.getElementById('lastUpdated').textContent = 'Update ' + now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}) + ' WIB';
+    const startIdx = dayStart >= 0 ? dayStart : 0;
+    const day = all.slice(startIdx, startIdx + 24);
+    let nowAbs = all.findIndex(h => h.date === cur.date && h.hour === cur.hour);
+    if(nowAbs < 0) nowAbs = startIdx + clamp(cur.hour, 0, 23);
+    const nowIdx = clamp(nowAbs - startIdx, 0, day.length - 1);
+    const nowHourAbs = startIdx + nowIdx;
 
-      // update the BINUS marker's popup with the live reading
-      const youEntry = Object.values(markers).find(m => m.point.isYou);
-      if (youEntry) {
-        youEntry.marker.setPopupContent(buildPopup(youEntry.point, { uv, aqi }));
+    // matahari terbit / terbenam hari ini
+    const daily = fc.daily || {};
+    const dayIdx = (daily.time || []).indexOf(cur.date);
+    const sunrise = dayIdx >= 0 ? apiTime(daily.sunrise[dayIdx]) : null;
+    const sunset = dayIdx >= 0 ? apiTime(daily.sunset[dayIdx]) : null;
+    const srHour = sunrise ? sunrise.hour : 0;
+    const ssHour = sunset ? sunset.hour : 23;
+
+    // jendela terbaik dihitung untuk 24 jam ke depan, bukan hanya sisa hari ini
+    const future = all.slice(nowHourAbs, nowHourAbs + 24);
+    const win = findBestWindow(future, srHour, ssHour);
+    // jendela hanya digambar kalau masih jatuh di hari yang sama dengan grafik
+    const winInDay = win && nowIdx + win.from < day.length && win.start.date === cur.date;
+    const chartWin = winInDay ? {
+      from: clamp(nowIdx + win.from, 0, day.length - 1),
+      to: clamp(nowIdx + win.to, 0, day.length - 1)
+    } : null;
+
+    const bands = renderVerdict(p);
+    renderGauges(p, bands, day);
+    renderChart(day, nowIdx, chartWin, srHour, ssHour);
+    renderBest(win, cur.date);
+    renderHourStrip(all.slice(nowHourAbs, nowHourAbs + 12));
+
+    p.sunriseLabel = sunrise ? sunrise.hhmm : '-';
+    p.sunsetLabel = sunset ? sunset.hhmm : '-';
+    p.todayLabel = cur.date;
+    p.uvMax = dayIdx >= 0 ? daily.uv_index_max[dayIdx] : null;
+    p.aqiMax = day.length ? Math.max.apply(null, day.map(d => d.aqi)) : null;
+    p.rainNow = isNum(popVals[nowHourAbs]) ? popVals[nowHourAbs] + '%' : '-';
+    renderStats(p);
+    renderPollutants(aq.current);
+    renderPointList();
+
+    const advice = adviceFor(bands.uvB.level, bands.aqiB.level);
+    $('adviceUv').innerHTML = advice.uv.map(t => '<li>' + esc(t) + '</li>').join('');
+    $('adviceAir').innerHTML = advice.air.map(t => '<li>' + esc(t) + '</li>').join('');
+
+    state.statusBase = 'Update ' + p.nowLabel + ' WIB · auto refresh tiap 10 menit';
+    $('lastUpdated').textContent = state.statusBase;
+    $('footUpdated').textContent = 'Update ' + p.nowLabel + ' WIB';
+  }
+
+  function renderRefs(){
+    POINTS.forEach(point => {
+      const entry = markers[point.name];
+      if(!entry) return;
+      const reading = state.refs[point.name] || (point.isYou ? state.primary : null);
+      if(!reading) return;
+      entry.marker.setIcon(pinIcon(point.isYou ? 'you' : 'ref', reading.level));
+      entry.marker.setPopupContent(popupHtml(point, reading));
+    });
+    ensureMeMarker();
+    renderPointList();
+  }
+
+  // ================= pemuatan data =================
+  function setLoading(on){
+    $('loadingState').classList.toggle('hidden', !on);
+    if(on){ $('errorState').classList.add('hidden'); $('content').classList.add('hidden'); }
+    const btn = $('refreshBtn');
+    if(btn){ btn.disabled = on; btn.classList.toggle('is-loading', on); }
+  }
+  function showBanner(text){
+    $('bannerText').textContent = text;
+    $('banner').classList.remove('hidden');
+  }
+  function hideBanner(){ $('banner').classList.add('hidden'); }
+
+  async function loadData(){
+    setLoading(true);
+    try{
+      const primaryPoint = POINTS.find(p => p.isYou);
+      const data = await fetchPoint(primaryPoint.lat, primaryPoint.lon, true);
+      state.primary = data;
+      state.lastOk = Date.now();
+      state.stale = false;
+      hideBanner();
+      $('content').classList.remove('hidden');
+      $('errorState').classList.add('hidden');
+      renderPrimary();
+      loadReferencePoints();
+      saveCache();
+      if(map) setTimeout(() => map.invalidateSize(), 60);
+    }catch(err){
+      const cache = readCache();
+      if(cache && cache.primary){
+        state.primary = cache.primary;
+        state.refs = cache.refs || {};
+        state.me = cache.me || null;
+        state.stale = true;
+        showBanner('Gagal mengambil data baru. Menampilkan data terakhir yang tersimpan (' + clockJakarta(new Date(cache.savedAt)) + ' WIB).');
+        $('content').classList.remove('hidden');
+        $('errorState').classList.add('hidden');
+        renderPrimary();
+        renderRefs();
+        renderMe();
+      }else{
+        $('loadingState').classList.add('hidden');
+        $('errorState').classList.remove('hidden');
+        $('errorMessage').textContent = 'Tidak bisa ambil data cuaca. Cek koneksi internet, lalu coba lagi.';
       }
-
-      document.getElementById('loadingState').classList.add('hidden');
-      document.getElementById('content').classList.remove('hidden');
-
-      if (map) { setTimeout(() => map.invalidateSize(), 50); }
-
-    } catch (err) {
-      document.getElementById('loadingState').classList.add('hidden');
-      document.getElementById('errorState').classList.remove('hidden');
-      document.getElementById('errorMessage').textContent =
-        'Tidak bisa ambil data cuaca. Cek koneksi internet, lalu coba lagi.';
       console.error(err);
+    }finally{
+      state.nextAt = Date.now() + REFRESH_MS;
+      setLoading(false);
     }
   }
 
   async function loadReferencePoints(){
-    const others = REFERENCE_POINTS.filter(p => !p.isYou);
-
+    const others = POINTS.filter(p => !p.isYou);
     await Promise.all(others.map(async point => {
       const entry = markers[point.name];
-      if (!entry) return;
-      try {
-        const result = await fetchPoint(point.lat, point.lon);
-        const uvB = uvBand(result.uv);
-        const aqiB = aqiBand(result.aqi);
-        const worse = RANK[uvB.level] >= RANK[aqiB.level] ? uvB.level : aqiB.level;
-
-        entry.marker.setIcon(pinIcon('ref', worse));
-        entry.marker.setPopupContent(buildPopup(point, result));
-      } catch (err) {
-        console.error('Failed to load reading for', point.name, err);
-        entry.marker.setPopupContent(`<span class="popup-name">${point.name}</span>${point.desc}<br><span class="popup-reading">Data tidak tersedia</span>`);
+      if(!entry) return;
+      try{
+        const result = await fetchPoint(point.lat, point.lon, false);
+        state.refs[point.name] = { uv: result.uv, aqi: result.aqi, level: result.level };
+        entry.marker.setIcon(pinIcon('ref', result.level));
+        entry.marker.setPopupContent(popupHtml(point, result));
+        renderPointList();
+        saveCache();
+      }catch(err){
+        console.error('Gagal memuat', point.name, err);
+        entry.marker.setPopupContent('<span class="popup-name">' + esc(point.name) + '</span><span class="popup-desc">' + esc(point.desc) + '</span><span class="popup-reading">Data tidak tersedia</span>');
       }
     }));
   }
 
-  initMap();
-  loadData();
-  loadReferencePoints();
-  // auto-refresh every 10 minutes
-  setInterval(() => { loadData(); loadReferencePoints(); }, 10 * 60 * 1000);
+  function useMyLocation(){
+    const note = $('locNote');
+    if(!navigator.geolocation){
+      note.textContent = 'Browser ini tidak mendukung geolokasi.';
+      return;
+    }
+    note.textContent = 'Mencari posisi Anda...';
+    navigator.geolocation.getCurrentPosition(async pos => {
+      const lat = pos.coords.latitude, lon = pos.coords.longitude;
+      try{
+        const data = await fetchPoint(lat, lon, false);
+        state.me = { lat, lon, uv: data.uv, aqi: data.aqi, level: data.level };
+        ensureMeMarker();
+        if(map) map.flyTo([lat, lon], 13, { duration:0.8 });
+        renderMe();
+        renderPointList();
+        saveCache();
+        note.textContent = 'Perkiraan untuk koordinat GPS perangkat ini. Data tetap berbasis model, bukan sensor personal.';
+      }catch(err){
+        note.textContent = 'Gagal mengambil data untuk lokasi Anda. Coba beberapa saat lagi.';
+        console.error(err);
+      }
+    }, err => {
+      note.textContent = err.code === 1
+        ? 'Akses lokasi ditolak. Izinkan lokasi di pengaturan browser lalu coba lagi.'
+        : 'Gagal mendapatkan posisi Anda. Coba lagi di area terbuka.';
+    }, { enableHighAccuracy:false, timeout:12000, maximumAge:300000 });
+  }
+
+  // ================= tema =================
+  function applyTheme(theme){
+    document.documentElement.dataset.theme = theme;
+    try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if(meta) meta.setAttribute('content', theme === 'dark' ? '#131A20' : '#FBF3E3');
+    const icon = $('themeIcon');
+    if(icon){
+      icon.innerHTML = theme === 'dark'
+        ? '<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/>'
+        : '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>';
+    }
+  }
+
+  // ================= penghitung =================
+  function tickCountdown(){
+    const el = $('lastUpdated');
+    if(!el || !state.nextAt || !state.statusBase) return;
+    const left = Math.max(0, state.nextAt - Date.now());
+    const m = Math.floor(left / 60000), s = Math.floor((left % 60000) / 1000);
+    el.textContent = state.statusBase + ' · update lagi dalam ' + m + ':' + pad2(s);
+  }
+
+  // ================= init =================
+  function init(){
+    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
+    $('themeBtn').addEventListener('click', () => {
+      applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+    });
+    $('locBtn').addEventListener('click', useMyLocation);
+    $('locBtn2').addEventListener('click', useMyLocation);
+
+    initMap();
+    loadData();
+    setInterval(loadData, REFRESH_MS);
+    setInterval(tickCountdown, 1000);
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  window.loadData = loadData;
+})();
 </script>
 
 </body>
